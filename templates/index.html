@@ -1,0 +1,1970 @@
+<!doctype html>
+<html lang="es">
+  <head>
+    <meta charset="UTF-8" />
+    <meta
+      name="viewport"
+      content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no"
+    />
+    <title>Para Sophie la personita mas linda que conoci ultimamente</title>
+
+    <link
+      href="https://fonts.googleapis.com/css2?family=Creepster&family=New+Rocker&family=VT323&family=Inter:wght@300;400;600&display=swap"
+      rel="stylesheet"
+    />
+
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/three.js/r128/three.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/gsap/3.12.5/gsap.min.js"></script>
+
+    <style>
+      :root {
+        --neon-pink: #ff007f;
+        --neon-glow: #ff66cc;
+        --neon-green: #00ffcc;
+        --goth-purple: #8000ff;
+        --dark-bg: #050208;
+      }
+
+      * {
+        box-sizing: border-box;
+      }
+
+      html,
+      body {
+        margin: 0;
+        padding: 0;
+        overflow: hidden; /* Evita el scroll indeseado en móviles */
+        height: 100%;
+        width: 100%;
+        background-color: var(--dark-bg);
+        font-family: "Inter", sans-serif;
+        color: #ffffff;
+        cursor:
+          url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='32' height='32' viewBox='0 0 32 32'%3E%3Cpath d='M16 8c-1.5 2-3 2.5-4.5 1.5-2-1.3-4-1-5.5.5C4.5 11.5 4 14 6 18c1.5 3 4 5 7 5.5.5-1.5 1.5-2.5 3-2.5s2.5 1 3 2.5c3-.5 5.5-2.5 7-5.5 2-4 1.5-6.5 0-8-1.5-1.5-3.5-1.8-5.5-.5-1.5 1-3 .5-4.5-1.5zM16 11l1 2h-2z' fill='%23ff007f' stroke='%23000000' stroke-width='1.5'/%3E%3C/svg%3E")
+            16 16,
+          auto;
+      }
+
+      #bg-three {
+        position: fixed;
+        inset: 0;
+        z-index: 5;
+      }
+      #fogCanvas {
+        position: fixed;
+        inset: 0;
+        z-index: 2;
+        pointer-events: none;
+      }
+
+      /* Filtros VHS */
+      .vhs-noise {
+        position: fixed;
+        inset: 0;
+        pointer-events: none;
+        z-index: 9998;
+        opacity: 0.06;
+        background: url("data:image/svg+xml,%3Csvg viewBox='0 0 200 200' xmlns='http://www.w3.org/2000/svg'%3E%3Cfilter id='noiseFilter'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.75' numOctaves='3' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23noiseFilter)'/%3E%3C/svg%3E");
+        animation: noise-move 0.15s infinite steps(4);
+      }
+      .scanlines {
+        position: fixed;
+        inset: 0;
+        pointer-events: none;
+        z-index: 9999;
+        opacity: 0.4;
+        background: linear-gradient(
+          rgba(18, 16, 16, 0) 50%,
+          rgba(0, 0, 0, 0.25) 50%
+        );
+        background-size: 100% 4px;
+      }
+      .crt-vignette {
+        position: fixed;
+        inset: 0;
+        pointer-events: none;
+        z-index: 10000;
+        background: radial-gradient(
+          circle,
+          rgba(136, 136, 136, 0) 50%,
+          rgba(0, 0, 0, 0) 100%
+        );
+        box-shadow: inset 0 0 80px rgba(0, 0, 0, 0.9);
+      }
+      @keyframes noise-move {
+        0% {
+          transform: translate(0, 0);
+        }
+        25% {
+          transform: translate(-1%, 1.2%);
+        }
+        50% {
+          transform: translate(1.5%, -0.8%);
+        }
+        75% {
+          transform: translate(-0.5%, -1.5%);
+        }
+        100% {
+          transform: translate(0.8%, 0.5%);
+        }
+      }
+
+      .glitch-flash {
+        position: fixed;
+        inset: 0;
+        background: rgba(255, 0, 127, 0.15);
+        z-index: 9990;
+        pointer-events: none;
+        opacity: 0;
+      }
+      .sparkle-particle {
+        position: absolute;
+        border-radius: 50%;
+        pointer-events: none;
+        z-index: 9995;
+      }
+
+      /* Elementos UI & Responsividad */
+      .goth-terminal {
+        position: absolute;
+        top: 20px;
+        left: 20px;
+        width: 320px;
+        background: rgba(10, 5, 15, 0.85);
+        border: 1px solid var(--neon-pink);
+        padding: 12px;
+        font-family: "VT323", monospace;
+        font-size: 1.1rem;
+        color: var(--neon-green);
+        z-index: 30;
+        border-radius: 4px;
+        backdrop-filter: blur(8px);
+        transition: all 0.8s ease;
+      }
+      .goth-terminal.minimized {
+        top: 10px;
+        left: 10px;
+        width: auto !important;
+        padding: 6px 12px;
+        font-size: 0.9rem;
+      }
+      .terminal-title {
+        color: var(--neon-pink);
+        border-bottom: 1px solid var(--neon-pink);
+        display: flex;
+        justify-content: space-between;
+        margin-bottom: 6px;
+        transition: all 0.8s ease;
+      }
+      .goth-terminal.minimized .terminal-title {
+        border-bottom: none;
+        margin-bottom: 0;
+        gap: 15px;
+      }
+
+      /* Texto Instructivo Interactivo */
+      .instruction-text {
+        position: absolute;
+        top: 25%; /* Más arriba para no interferir con el ataúd */
+        left: 50%;
+        transform: translate(-50%, -50%);
+        color: var(--neon-green);
+        font-family: "VT323", monospace;
+        font-size: 2.2rem;
+        text-align: center;
+        z-index: 20;
+        pointer-events: none;
+        text-shadow:
+          0 0 15px var(--neon-green),
+          0 0 25px rgba(0, 0, 0, 0.9);
+        animation: pulse-text-fast 0.8s infinite alternate;
+        width: 90%;
+      }
+      @keyframes pulse-text-fast {
+        0% {
+          opacity: 0.1;
+          transform: translate(-50%, -50%) scale(0.9);
+        }
+        100% {
+          opacity: 1;
+          transform: translate(-50%, -50%) scale(1.1);
+        }
+      }
+
+      .warning-overlay {
+        position: fixed;
+        top: 40%;
+        left: 50%;
+        transform: translate(-50%, -50%);
+        background: rgba(25, 0, 35, 0.95);
+        border: 2px solid var(--neon-pink);
+        padding: 25px 40px;
+        z-index: 1000;
+        font-family: "VT323", monospace;
+        font-size: 1.8rem;
+        text-align: center;
+        border-radius: 8px;
+        pointer-events: none;
+        opacity: 0;
+        text-shadow: 0 0 8px var(--neon-pink);
+      }
+
+      .dimension-sync-panel {
+        position: absolute;
+        bottom: 25px;
+        left: 50%;
+        transform: translateX(-50%);
+        width: 380px;
+        background: rgba(5, 5, 10, 0.9);
+        border: 2px dashed var(--neon-pink);
+        border-radius: 6px;
+        padding: 10px 20px;
+        z-index: 30;
+        text-align: center;
+        font-family: "VT323", monospace;
+      }
+      .sync-title {
+        font-size: 1.3rem;
+        margin-bottom: 6px;
+      }
+      .sync-bar {
+        width: 100%;
+        height: 12px;
+        background: #1a0520;
+        border: 1px solid var(--neon-pink);
+        border-radius: 6px;
+        position: relative;
+      }
+      .sync-fill {
+        width: 0%;
+        height: 100%;
+        background: linear-gradient(
+          90deg,
+          var(--goth-purple),
+          var(--neon-pink)
+        );
+        transition: width 0.3s ease;
+      }
+      .click-hint {
+        color: var(--neon-green);
+        margin-top: 6px;
+        font-size: 1.1rem;
+      }
+
+      #scene {
+        position: absolute;
+        inset: 0;
+        pointer-events: none;
+        z-index: 10;
+        overflow: hidden;
+      }
+      .sticker {
+        position: absolute;
+        width: 160px;
+        opacity: 0;
+        filter: drop-shadow(0 0 15px var(--neon-pink));
+        pointer-events: none;
+        z-index: 4;
+      }
+      .falling-rose {
+        pointer-events: none;
+        z-index: 4; /* Cambiado de 8 a 4 */
+      }
+
+      .polaroid-frame {
+        position: absolute;
+        top: 25%;
+        left: 50%;
+        transform: translate(-50%, -50%) scale(0);
+        width: 280px;
+        background: #fbfbfb;
+        padding: 12px 12px 30px 12px;
+        box-shadow: 0 15px 35px rgba(0, 0, 0, 0.8);
+        border: 1px solid #ddd;
+        z-index: 4; /* Cambiado de 80 a 4 */
+        color: #1a1a1a;
+        font-family: "New Rocker", cursive;
+        text-align: center;
+        font-size: 1.2rem;
+        pointer-events: none;
+      }
+
+      .flutter-window {
+        position: absolute;
+        top: 20%;
+        right: 5%;
+        width: 240px;
+        height: 240px;
+        border: 2px solid var(--neon-pink);
+        box-shadow: 0 0 25px var(--neon-pink);
+        background: radial-gradient(
+          circle,
+          rgba(128, 0, 255, 0.2) 0%,
+          rgba(0, 0, 0, 0.49) 100%
+        );
+        border-radius: 50%;
+        opacity: 0;
+        transform: scale(0);
+        z-index: 4;
+        display: flex;
+        justify-content: center;
+        align-items: center;
+        overflow: hidden; /* Asegura que la imagen no se salga del borde */
+      }
+      .flutter-window img {
+        width: 100%;
+        height: 100%;
+        object-fit: cover; /* Escala la imagen para llenar el contenedor */
+        border-radius: 50%;
+      }
+      .polaroid-img {
+        max-width: 100%;
+        height: auto;
+      }
+
+      /* Widget Winamp Editable */
+      .winamp-window {
+        position: absolute;
+        bottom: -600px;
+        left: 50%;
+        transform: translateX(-50%);
+        width: 480px;
+        background: rgba(12, 6, 20, 0.9);
+        border: 2px solid var(--neon-pink);
+        border-radius: 4px;
+        z-index: 90;
+        backdrop-filter: blur(15px);
+        font-family: "Inter", sans-serif;
+      }
+      .winamp-title-bar {
+        background: linear-gradient(
+          90deg,
+          var(--goth-purple),
+          var(--neon-pink)
+        );
+        padding: 5px 10px;
+        font-family: "VT323", monospace;
+        font-size: 1.2rem;
+        display: flex;
+        justify-content: space-between;
+        border-bottom: 2px solid var(--neon-pink);
+      }
+      .winamp-controls {
+        display: flex;
+        gap: 6px;
+      }
+      .winamp-btn {
+        width: 18px;
+        height: 18px;
+        background: #1a0525;
+        border: 1px solid var(--neon-pink);
+        color: var(--neon-pink);
+        font-size: 0.8rem;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        cursor: pointer;
+        transition: 0.2s;
+      }
+      .winamp-btn:hover {
+        background: var(--neon-pink);
+        color: #ffffff;
+      }
+
+      .player-widget {
+        background: #0a0410;
+        border-bottom: 1px solid rgba(255, 0, 127, 0.3);
+        padding: 10px;
+      }
+      .song-info {
+        background: #020104;
+        border: 1px solid var(--neon-green);
+        padding: 4px 8px;
+        font-family: "VT323", monospace;
+        color: var(--neon-green);
+        margin-bottom: 8px;
+        overflow: hidden;
+        white-space: nowrap;
+      }
+      .ticker-text {
+        display: inline-block;
+        animation: ticker-anim 15s linear infinite;
+      }
+      @keyframes ticker-anim {
+        0% {
+          transform: translate3d(100%, 0, 0);
+        }
+        100% {
+          transform: translate3d(-100%, 0, 0);
+        }
+      }
+
+      .player-controls {
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+        gap: 10px;
+      }
+      .goth-btn {
+        background: rgba(128, 0, 255, 0.2);
+        border: 1px solid var(--neon-pink);
+        color: #ffffff;
+        font-family: "VT323", monospace;
+        font-size: 1.1rem;
+        padding: 5px 12px;
+        cursor: pointer;
+        border-radius: 2px;
+      }
+      .goth-range {
+        -webkit-appearance: none;
+        width: 70px;
+        height: 6px;
+        background: #1a0520;
+        border: 1px solid var(--neon-pink);
+      }
+      .goth-range::-webkit-slider-thumb {
+        -webkit-appearance: none;
+        width: 12px;
+        height: 12px;
+        background: var(--neon-green);
+        cursor: pointer;
+        border: 1px solid #fff;
+      }
+
+      .winamp-content {
+        padding: 15px;
+        max-height: 250px;
+        overflow-y: auto;
+        background: #06020a;
+      }
+      .message-display-pane {
+        font-size: 0.95rem;
+        line-height: 1.6;
+        color: #e5d4f5;
+        white-space: pre-wrap;
+      }
+      .goth-textarea {
+        width: 100%;
+        height: 160px;
+        background: #020104;
+        border: 1px dashed var(--neon-pink);
+        color: var(--neon-green);
+        font-family: "Inter", sans-serif;
+        font-size: 0.95rem;
+        padding: 10px;
+        resize: none;
+        outline: none;
+      }
+      .winamp-footer {
+        padding: 10px 15px;
+        border-top: 1px solid rgba(255, 0, 127, 0.3);
+        display: flex;
+        justify-content: flex-end;
+        align-items: center;
+        gap: 10px;
+        background: #0a0410;
+      }
+      .status-msg {
+        font-family: "VT323", monospace;
+        font-size: 1rem;
+        color: var(--neon-green);
+        margin-right: auto;
+      }
+      .hidden {
+        display: none !important;
+      }
+
+      /* CSS RESPONSIVE - ADAPTACIÓN TOTAL PARA MÓVILES */
+      @media (max-width: 768px) {
+        .goth-terminal {
+          width: 90%;
+          top: 10px;
+          left: 5%;
+          font-size: 0.9rem;
+        }
+        .dimension-sync-panel {
+          width: 90%;
+          bottom: 15px;
+          font-size: 1rem;
+          padding: 8px;
+        }
+        .winamp-window {
+          width: 95%;
+          max-width: 480px;
+        }
+        .instruction-text {
+          font-size: 1.2rem;
+          top: 65%;
+        }
+        .polaroid-frame {
+          width: 220px;
+          font-size: 1rem;
+        }
+        .polaroid-img {
+          height: 170px;
+        }
+        .flutter-window {
+          width: 160px;
+          height: 160px;
+        }
+        .sticker {
+          width: 100px !important;
+        }
+        .warning-overlay {
+          font-size: 1.2rem;
+          padding: 15px 20px;
+          width: 90%;
+        }
+        .player-controls {
+          flex-direction: column;
+          align-items: stretch;
+        }
+      }
+    </style>
+  </head>
+
+  <body>
+    <div
+      id="instruccion-ataud"
+      style="
+        position: absolute;
+        top: 50%;
+        left: 50%;
+        transform: translate(-50%, -50%);
+        z-index: 20;
+        text-align: center;
+        pointer-events: none;
+      "
+    >
+      <h2
+        style="
+          color: var(--neon-green);
+          font-family: &quot;VT323&quot;, monospace;
+          font-size: 2rem;
+          text-shadow: 0 0 15px var(--neon-green);
+          margin-top: 10px;
+        "
+      ></h2>
+    </div>
+
+    <canvas id="fogCanvas"></canvas>
+
+    <!-- NUEVO: Imagen de fondo que aparecerá junto con el pastel -->
+    <div
+      id="final-bg"
+      style="
+        position: absolute;
+        top: 0;
+        left: 0;
+        width: 100%;
+        height: 100%;
+        z-index: 3;
+        opacity: 0;
+        pointer-events: none;
+        display: flex;
+        justify-content: top;
+        align-items: top;
+        background: #050208;
+      "
+    >
+      <img
+        src="/static/sofi.jpeg"
+        style="width: 100%; height: 50%; object-fit: cover; opacity: 0.35"
+        alt="Sofi Background"
+        onerror="this.style.display = 'none'"
+      />
+      <!-- Se añade un gradiente superpuesto para que los bordes se oscurezcan y el texto siga siendo legible -->
+      <div
+        style="
+          position: absolute;
+          top: 0;
+          left: 0;
+          width: 100%;
+          height: 100%;
+          background: radial-gradient(
+            circle,
+            rgba(0, 0, 0, 0) 20%,
+            rgba(5, 2, 8, 0) 100%
+          );
+        "
+      ></div>
+    </div>
+
+    <div id="bg-three"></div>
+    <div class="vhs-noise"></div>
+    <div class="scanlines"></div>
+    <div class="crt-vignette"></div>
+    <div class="glitch-flash" id="flash-overlay"></div>
+
+    <div class="goth-terminal" id="main-terminal">
+      <div class="terminal-title">
+        <span>SOPHIE_CORE_OS_v3.2</span><span id="terminal-tick">SYS_OK</span>
+      </div>
+      <div id="terminal-content">
+        <div>SECTOR: D-EMO_GOTH_Y2K</div>
+        <div id="term-status-1">DIMENSION: SYNCING...</div>
+        <div id="term-status-2">TARGET_ID: SOPHIE</div>
+        <div id="term-status-3">STATUS: ENCRIPTADA</div>
+      </div>
+    </div>
+
+    <div id="instruction-text" class="instruction-text">
+      !HOLI, PEGALE AL ATAUD!!
+    </div>
+    <div class="warning-overlay" id="warn-banner">GIR_DETECTOR: OVERLOAD</div>
+
+    <div class="polaroid-frame" id="polaroid-widget">
+      <img
+        src="/static/sogir.jpeg"
+        class="polaroid-img"
+        alt="Sophie & GIR"
+        onerror="this.src = 'https://via.placeholder.com/200'"
+      />
+      <div>SOPHIE & GIR 2026</div>
+    </div>
+
+    <div
+      class="polaroid-frame"
+      id="polaroid-widget-2"
+      style="top: 30%; left: 20%"
+    >
+      <img src="/static/gir1.jpeg" class="polaroid-img" alt="Otra Foto" />
+      <div>TQM SOPHIE</div>
+    </div>
+
+    <div class="flutter-window" id="flutter-goth-shadow">
+      <img
+        src="/static/fluttergoth.jpeg"
+        alt="Fluttergoth shadow"
+        onerror="this.src = 'https://via.placeholder.com/200'"
+      />
+    </div>
+
+    <div id="scene">
+      <img
+        src="/static/gir2.jpeg"
+        class="sticker"
+        id="gir-flyer"
+        style="width: 140px; transform: scaleX(-1)"
+        onerror="this.style.display = 'none'"
+      />
+      <img
+        src="/static/flugir.jpeg"
+        class="sticker"
+        id="flugir-sticker"
+        style="width: 180px; border-radius: 10px"
+        onerror="this.style.display = 'none'"
+      />
+    </div>
+
+    <div class="dimension-sync-panel" id="progress-panel">
+      <div class="sync-title">
+        SINCRO-DIMENSIÓN: <span id="sync-val">0</span>/7
+      </div>
+      <div class="sync-bar">
+        <div class="sync-fill" id="sync-progress"></div>
+      </div>
+      <div class="click-hint" id="sync-instructions">
+        SISTEMA A LA ESPERA DE IMPACTO...
+      </div>
+    </div>
+
+    <div class="winamp-window" id="letter-panel">
+      <div class="winamp-title-bar">
+        <span class="winamp-title">SOPHIE_GOTH_PLAYER.EXE</span>
+        <div class="winamp-controls">
+          <span class="winamp-btn" onclick="toggleWinampMinimize()">-</span>
+          <span class="winamp-btn" onclick="synth.playClick()">□</span>
+          <span
+            class="winamp-btn"
+            onclick="alert('La dimension de Sophie es eterna.')"
+            >×</span
+          >
+        </div>
+      </div>
+
+      <div class="player-widget">
+        <div class="song-info">
+          <div class="ticker-wrap">
+            <div class="ticker-text" id="player-ticker">
+              NOW PLAYING: THEATRE OF TRAGEDY - DER TANZ DER SCHATTEN
+            </div>
+          </div>
+        </div>
+        <div class="player-controls">
+          <button class="goth-btn btn-sm" id="btn-play-music">
+            REPRODUCIR MÚSICA
+          </button>
+          <div class="volume-slider-container">
+            <span>VOL</span
+            ><input
+              type="range"
+              id="volume-slider"
+              min="0"
+              max="100"
+              value="50"
+              class="goth-range"
+            />
+          </div>
+        </div>
+      </div>
+
+      <div class="winamp-content">
+        <div class="message-display-pane" id="message-view">
+          <div id="message-content"></div>
+        </div>
+        <div class="message-edit-pane hidden" id="message-edit">
+          <textarea id="message-textarea" class="goth-textarea"></textarea>
+        </div>
+      </div>
+
+      <div class="winamp-footer">
+        <span id="save-status" class="status-msg"></span>
+        <button class="goth-btn btn-sm" id="btn-edit">MODIFICAR</button>
+        <button class="goth-btn btn-sm hidden" id="btn-save">GUARDAR</button>
+        <button class="goth-btn btn-sm hidden" id="btn-cancel">CANCELAR</button>
+      </div>
+    </div>
+
+    <script type="application/json" id="message-data">
+      {{ message | tojson }}
+    </script>
+
+    <script>
+      // ----------------------------------------------------
+      // PROCEDURAL SOUND FX (Web Audio API) - Sin cambios
+      // ----------------------------------------------------
+      class CyberSynth {
+        constructor() {
+          this.ctx = null;
+          this.isPlayingDarkwave = false;
+          this.volumeLevel = 0.5;
+        }
+        init() {
+          if (!this.ctx) {
+            this.ctx = new (window.AudioContext || window.webkitAudioContext)();
+            this.volumeNode = this.ctx.createGain();
+            this.volumeNode.gain.setValueAtTime(
+              this.volumeLevel,
+              this.ctx.currentTime,
+            );
+            this.volumeNode.connect(this.ctx.destination);
+          }
+          if (this.ctx.state === "suspended") this.ctx.resume();
+        }
+        setVolume(val) {
+          this.volumeLevel = val;
+          if (this.volumeNode && this.ctx)
+            this.volumeNode.gain.linearRampToValueAtTime(
+              val,
+              this.ctx.currentTime + 0.1,
+            );
+        }
+        playClick() {
+          this.init();
+          let osc = this.ctx.createOscillator();
+          let gain = this.ctx.createGain();
+          osc.connect(gain);
+          gain.connect(this.volumeNode);
+          osc.type = "triangle";
+          osc.frequency.setValueAtTime(160, this.ctx.currentTime);
+          osc.frequency.exponentialRampToValueAtTime(
+            800,
+            this.ctx.currentTime + 0.08,
+          );
+          gain.gain.setValueAtTime(0.25, this.ctx.currentTime);
+          gain.gain.exponentialRampToValueAtTime(
+            0.001,
+            this.ctx.currentTime + 0.08,
+          );
+          osc.start();
+          osc.stop(this.ctx.currentTime + 0.08);
+        }
+        playGlitch() {
+          this.init();
+          let bs = this.ctx.sampleRate * 0.15;
+          let buf = this.ctx.createBuffer(1, bs, this.ctx.sampleRate);
+          let d = buf.getChannelData(0);
+          for (let i = 0; i < bs; i++) d[i] = Math.random() * 2 - 1;
+          let n = this.ctx.createBufferSource();
+          n.buffer = buf;
+          let f = this.ctx.createBiquadFilter();
+          f.type = "bandpass";
+          f.frequency.value = 1200;
+          let g = this.ctx.createGain();
+          g.gain.setValueAtTime(0.2, this.ctx.currentTime);
+          g.gain.exponentialRampToValueAtTime(
+            0.001,
+            this.ctx.currentTime + 0.15,
+          );
+          n.connect(f);
+          f.connect(g);
+          g.connect(this.volumeNode);
+          n.start();
+        }
+        playGIR() {
+          this.init();
+          let now = this.ctx.currentTime;
+          for (let i = 0; i < 5; i++) {
+            let osc = this.ctx.createOscillator();
+            let gain = this.ctx.createGain();
+            osc.type = "square";
+            osc.frequency.setValueAtTime(900 + i * 250, now + i * 0.05);
+            osc.frequency.exponentialRampToValueAtTime(
+              150 + i * 80,
+              now + i * 0.05 + 0.04,
+            );
+            gain.gain.setValueAtTime(0.12, now + i * 0.05);
+            gain.gain.exponentialRampToValueAtTime(
+              0.001,
+              now + i * 0.05 + 0.04,
+            );
+            osc.connect(gain);
+            gain.connect(this.volumeNode);
+            osc.start(now + i * 0.05);
+            osc.stop(now + i * 0.05 + 0.05);
+          }
+        }
+        playLullaby() {
+          this.init();
+          let notes = [587.33, 659.25, 783.99, 880.0, 987.77];
+          let now = this.ctx.currentTime;
+          notes.forEach((freq, idx) => {
+            let osc = this.ctx.createOscillator();
+            let gain = this.ctx.createGain();
+            osc.type = "sine";
+            osc.frequency.setValueAtTime(freq, now + idx * 0.22);
+            gain.gain.setValueAtTime(0.18, now + idx * 0.22);
+            gain.gain.exponentialRampToValueAtTime(
+              0.001,
+              now + idx * 0.22 + 0.7,
+            );
+            osc.connect(gain);
+            gain.connect(this.volumeNode);
+            osc.start(now + idx * 0.22);
+            osc.stop(now + idx * 0.22 + 0.8);
+          });
+        }
+        playExplosion() {
+          this.init();
+          let now = this.ctx.currentTime;
+          let osc = this.ctx.createOscillator();
+          let oscGain = this.ctx.createGain();
+          osc.type = "sawtooth";
+          osc.frequency.setValueAtTime(90, now);
+          osc.frequency.linearRampToValueAtTime(15, now + 1.8);
+          oscGain.gain.setValueAtTime(0.35, now);
+          oscGain.gain.exponentialRampToValueAtTime(0.001, now + 1.8);
+          osc.connect(oscGain);
+          oscGain.connect(this.volumeNode);
+          osc.start(now);
+          osc.stop(now + 1.8);
+          let bs = this.ctx.sampleRate * 2.5;
+          let buf = this.ctx.createBuffer(1, bs, this.ctx.sampleRate);
+          let d = buf.getChannelData(0);
+          for (let i = 0; i < bs; i++) d[i] = Math.random() * 2 - 1;
+          let noise = this.ctx.createBufferSource();
+          noise.buffer = buf;
+          let filter = this.ctx.createBiquadFilter();
+          filter.type = "lowpass";
+          filter.frequency.setValueAtTime(900, now);
+          filter.frequency.exponentialRampToValueAtTime(80, now + 1.8);
+          let noiseGain = this.ctx.createGain();
+          noiseGain.gain.setValueAtTime(0.45, now);
+          noiseGain.gain.exponentialRampToValueAtTime(0.001, now + 2.0);
+          noise.connect(filter);
+          filter.connect(noiseGain);
+          noiseGain.connect(this.volumeNode);
+          noise.start(now);
+          noise.stop(now + 2.5);
+        }
+        playSuccess() {
+          this.init();
+          let now = this.ctx.currentTime;
+          let notes = [523.25, 659.25, 783.99, 1046.5, 1318.51, 1567.98];
+          notes.forEach((freq, idx) => {
+            let osc = this.ctx.createOscillator();
+            let gain = this.ctx.createGain();
+            osc.type = "triangle";
+            osc.frequency.setValueAtTime(freq, now + idx * 0.06);
+            gain.gain.setValueAtTime(0.15, now + idx * 0.06);
+            gain.gain.exponentialRampToValueAtTime(
+              0.001,
+              now + idx * 0.06 + 0.35,
+            );
+            osc.connect(gain);
+            gain.connect(this.volumeNode);
+            osc.start(now + idx * 0.06);
+            osc.stop(now + idx * 0.06 + 0.4);
+          });
+        }
+        startDarkwaveLoop() {
+          this.init();
+          if (this.isPlayingDarkwave) return;
+          this.isPlayingDarkwave = true;
+          let tempo = 125;
+          let bd = 60 / tempo;
+          let step = 0;
+          let bm = [
+            110, 110, 130.81, 130.81, 87.31, 87.31, 82.41, 82.41, 110, 110,
+            146.83, 146.83, 164.81, 164.81, 82.41, 82.41,
+          ];
+          let lm = [
+            440, 0, 659.25, 0, 523.25, 0, 493.88, 0, 440, 0, 659.25, 0, 783.99,
+            0, 659.25, 0, 587.33, 0, 523.25, 0, 493.88, 0, 392, 0, 440, 0,
+            493.88, 0, 523.25, 0, 659.25, 0,
+          ];
+          this.darkwaveInterval = setInterval(
+            () => {
+              let now = this.ctx.currentTime;
+              if (step % 2 === 0) {
+                let k = this.ctx.createOscillator();
+                let kg = this.ctx.createGain();
+                k.type = "sine";
+                k.frequency.setValueAtTime(110, now);
+                k.frequency.exponentialRampToValueAtTime(35, now + 0.16);
+                kg.gain.setValueAtTime(0.5, now);
+                kg.gain.exponentialRampToValueAtTime(0.001, now + 0.16);
+                k.connect(kg);
+                kg.connect(this.volumeNode);
+                k.start(now);
+                k.stop(now + 0.17);
+              }
+              if (step % 2 === 1) {
+                let h = this.ctx.createOscillator();
+                let hg = this.ctx.createGain();
+                h.type = "triangle";
+                h.frequency.setValueAtTime(9000, now);
+                hg.gain.setValueAtTime(0.03, now);
+                hg.gain.exponentialRampToValueAtTime(0.001, now + 0.05);
+                h.connect(hg);
+                hg.connect(this.volumeNode);
+                h.start(now);
+                h.stop(now + 0.06);
+              }
+              let bf = bm[Math.floor(step / 2) % bm.length];
+              if (step % 2 === 0) {
+                let bo = this.ctx.createOscillator();
+                let bfilt = this.ctx.createBiquadFilter();
+                let bg = this.ctx.createGain();
+                bo.type = "sawtooth";
+                bo.frequency.setValueAtTime(bf, now);
+                bfilt.type = "lowpass";
+                bfilt.frequency.setValueAtTime(320, now);
+                bfilt.frequency.exponentialRampToValueAtTime(120, now + 0.44);
+                bg.gain.setValueAtTime(0.18, now);
+                bg.gain.exponentialRampToValueAtTime(0.001, now + 0.44);
+                bo.connect(bfilt);
+                bfilt.connect(bg);
+                bg.connect(this.volumeNode);
+                bo.start(now);
+                bo.stop(now + 0.45);
+              }
+              let lf = lm[step % lm.length];
+              if (lf > 0) {
+                let lo1 = this.ctx.createOscillator();
+                let lo2 = this.ctx.createOscillator();
+                let lg = this.ctx.createGain();
+                lo1.type = "triangle";
+                lo1.frequency.setValueAtTime(lf, now);
+                lo2.type = "sine";
+                lo2.frequency.setValueAtTime(lf * 1.5, now);
+                lg.gain.setValueAtTime(0.07, now);
+                lg.gain.exponentialRampToValueAtTime(0.001, now + 0.65);
+                lo1.connect(lg);
+                lo2.connect(lg);
+                lg.connect(this.volumeNode);
+                lo1.start(now);
+                lo2.start(now);
+                lo1.stop(now + 0.65);
+                lo2.stop(now + 0.65);
+              }
+              step++;
+            },
+            bd * 1000 * 0.5,
+          );
+        }
+        stopDarkwaveLoop() {
+          if (this.darkwaveInterval) {
+            clearInterval(this.darkwaveInterval);
+            this.darkwaveInterval = null;
+          }
+          this.isPlayingDarkwave = false;
+        }
+      }
+      const synth = new CyberSynth();
+
+      // NUEVO: Configuración de la música en MP3
+      const bgAudio = new Audio("/static/Nightcore - I Don't Know (Lyrics).mp3");
+      bgAudio.loop = true;
+      bgAudio.volume = 0.5;
+      let isPlayingMp3 = false;
+
+      // Fog Canvas
+      const fogCanvas = document.getElementById("fogCanvas");
+      const fogCtx = fogCanvas.getContext("2d");
+      let fogParticles = [];
+      function initFog() {
+        fogCanvas.width = window.innerWidth;
+        fogCanvas.height = window.innerHeight;
+        fogParticles = [];
+        for (let i = 0; i < 12; i++) {
+          fogParticles.push({
+            x: Math.random() * fogCanvas.width,
+            y: Math.random() * fogCanvas.height,
+            radius: Math.random() * 250 + 200,
+            vx: (Math.random() - 0.5) * 0.9,
+            vy: (Math.random() - 0.5) * 0.9,
+            color:
+              Math.random() > 0.5
+                ? "rgba(255, 0, 127, 0.04)"
+                : "rgba(128, 0, 255, 0.04)",
+          });
+        }
+      }
+      function updateAndDrawFog() {
+        fogCtx.fillStyle = "rgba(5, 2, 8, 0.15)";
+        fogCtx.fillRect(0, 0, fogCanvas.width, fogCanvas.height);
+        fogParticles.forEach((p) => {
+          p.x += p.vx;
+          p.y += p.vy;
+          if (p.x < -p.radius) p.x = fogCanvas.width + p.radius;
+          if (p.x > fogCanvas.width + p.radius) p.x = -p.radius;
+          if (p.y < -p.radius) p.y = fogCanvas.height + p.radius;
+          if (p.y > fogCanvas.height + p.radius) p.y = -p.radius;
+          let grad = fogCtx.createRadialGradient(
+            p.x,
+            p.y,
+            0,
+            p.x,
+            p.y,
+            p.radius,
+          );
+          grad.addColorStop(0, p.color);
+          grad.addColorStop(1, "rgba(0, 0, 0, 0)");
+          fogCtx.beginPath();
+          fogCtx.arc(p.x, p.y, p.radius, 0, Math.PI * 2);
+          fogCtx.fillStyle = grad;
+          fogCtx.fill();
+        });
+      }
+      window.addEventListener("resize", () => {
+        initFog();
+        if (renderer) {
+          camera.aspect = window.innerWidth / window.innerHeight;
+          camera.fov = window.innerWidth < 600 ? 75 : 60;
+          camera.position.z = window.innerWidth < 600 ? 7.5 : 5.5;
+          camera.updateProjectionMatrix();
+          renderer.setSize(window.innerWidth, window.innerHeight);
+        }
+      });
+      initFog();
+
+      // Partículas trail del mouse
+      document.addEventListener("mousemove", (e) => {
+        createTrailSparkle(e.clientX, e.clientY);
+      });
+      document.addEventListener("touchmove", (e) => {
+        createTrailSparkle(e.touches[0].clientX, e.touches[0].clientY);
+      });
+      function createTrailSparkle(x, y) {
+        if (Math.random() > 0.4) return;
+        const spark = document.createElement("div");
+        spark.className = "sparkle-particle";
+        document.body.appendChild(spark);
+        spark.style.left = `${x}px`;
+        spark.style.top = `${y}px`;
+        const size = Math.random() * 8 + 3;
+        spark.style.width = `${size}px`;
+        spark.style.height = `${size}px`;
+        const colors = ["#ff007f", "#ff66cc", "#00ffcc", "#8000ff"];
+        const color = colors[Math.floor(Math.random() * colors.length)];
+        spark.style.background = color;
+        spark.style.boxShadow = `0 0 10px ${color}`;
+        gsap.to(spark, {
+          x: (Math.random() - 0.5) * 60,
+          y: (Math.random() - 0.5) * 60 + 30,
+          opacity: 0,
+          scale: 0.1,
+          rotation: Math.random() * 360,
+          duration: 0.7 + Math.random() * 0.5,
+          onComplete: () => spark.remove(),
+        });
+      }
+
+      // ----------------------------------------------------
+      // THREE.JS - COFFIN & 3D CAKE FIXED PERSPECTIVE
+      // ----------------------------------------------------
+      // ----------------------------------------------------
+      // THREE.JS - INICIALIZACIÓN DEL ENTORNO 3D (Ataúd y Pastel)
+      // Este bloque configura la cámara, las luces y construye los
+      // modelos 3D usando geometría pura de Three.js (sin importar archivos .obj).
+      // ----------------------------------------------------
+      let scene, camera, renderer, starField;
+      let coffinGroup, coffinBody, coffinLid, cakeGroup3D;
+      let animFlames = [];
+
+      function initThree() {
+        const container = document.getElementById("bg-three");
+        scene = new THREE.Scene();
+        scene.fog = new THREE.FogExp2(0x050208, 0.12);
+
+        camera = new THREE.PerspectiveCamera(
+          window.innerWidth < 600 ? 75 : 60,
+          window.innerWidth / window.innerHeight,
+          0.1,
+          100,
+        );
+        camera.position.set(0, 0, window.innerWidth < 600 ? 7.5 : 5.5);
+
+        renderer = new THREE.WebGLRenderer({ alpha: true, antialias: true });
+        renderer.setSize(window.innerWidth, window.innerHeight);
+        renderer.setPixelRatio(Math.min(window.devicePixelRatio, 2));
+        container.appendChild(renderer.domElement);
+
+        const ambientLight = new THREE.AmbientLight(0x160c20, 1.4);
+        scene.add(ambientLight);
+        const pinkDirLight = new THREE.DirectionalLight(0xff007f, 2.0);
+        pinkDirLight.position.set(3, 5, 4);
+        scene.add(pinkDirLight);
+        const greenPointLight = new THREE.PointLight(0x00ffcc, 2.5, 12);
+        greenPointLight.position.set(-3, -3, 3);
+        scene.add(greenPointLight);
+
+
+        // Estrellas Neon Galaxy
+        const starCount = 350;
+        const starGeom = new THREE.BufferGeometry();
+        const starPositions = new Float32Array(starCount * 3);
+        const starColors = new Float32Array(starCount * 3);
+        const colors = [
+          new THREE.Color(0xff007f),
+          new THREE.Color(0x8000ff),
+          new THREE.Color(0x00ffcc),
+        ];
+        for (let i = 0; i < starCount; i++) {
+          starPositions[i * 3] = (Math.random() - 0.5) * 16;
+          starPositions[i * 3 + 1] = (Math.random() - 0.5) * 16;
+          starPositions[i * 3 + 2] = (Math.random() - 0.5) * 16;
+          let rColor = colors[Math.floor(Math.random() * colors.length)];
+          starColors[i * 3] = rColor.r;
+          starColors[i * 3 + 1] = rColor.g;
+          starColors[i * 3 + 2] = rColor.b;
+        }
+        starGeom.setAttribute(
+          "position",
+          new THREE.BufferAttribute(starPositions, 3),
+        );
+        starGeom.setAttribute(
+          "color",
+          new THREE.BufferAttribute(starColors, 3),
+        );
+        const starMat = new THREE.PointsMaterial({
+          size: 0.12,
+          vertexColors: true,
+          transparent: true,
+          opacity: 0.8,
+          blending: THREE.AdditiveBlending,
+        });
+        starField = new THREE.Points(starGeom, starMat);
+        scene.add(starField);
+
+        // Grupo del Ataúd
+        coffinGroup = new THREE.Group();
+        coffinGroup.rotation.set(0.35, -0.3, 0); // Inclinado inicialmente
+        scene.add(coffinGroup);
+
+        const coffinShape = new THREE.Shape();
+        coffinShape.moveTo(-0.6, -1.8);
+        coffinShape.lineTo(-1.25, 0.4);
+        coffinShape.lineTo(-0.75, 1.8);
+        coffinShape.lineTo(0.75, 1.8);
+        coffinShape.lineTo(1.25, 0.4);
+        coffinShape.lineTo(0.6, -1.8);
+        coffinShape.closePath();
+
+        const extrudeSettings = {
+          depth: 0.65,
+          bevelEnabled: true,
+          bevelSegments: 3,
+          steps: 1,
+          bevelSize: 0.04,
+          bevelThickness: 0.04,
+        };
+        const bodyGeom = new THREE.ExtrudeGeometry(
+          coffinShape,
+          extrudeSettings,
+        );
+        const bodyMat = new THREE.MeshStandardMaterial({
+          color: 0x0c0612,
+          roughness: 0.65,
+          metalness: 0.4,
+        });
+        coffinBody = new THREE.Mesh(bodyGeom, bodyMat);
+        coffinBody.position.z = -0.325;
+        coffinGroup.add(coffinBody);
+
+        const lidExtSettings = {
+          depth: 0.08,
+          bevelEnabled: true,
+          bevelSegments: 3,
+          steps: 1,
+          bevelSize: 0.03,
+          bevelThickness: 0.03,
+        };
+        const lidGeom = new THREE.ExtrudeGeometry(coffinShape, lidExtSettings);
+        const lidMat = new THREE.MeshStandardMaterial({
+          color: 0x180b26,
+          roughness: 0.5,
+          metalness: 0.6,
+        });
+        coffinLid = new THREE.Mesh(lidGeom, lidMat);
+        coffinLid.position.set(0, 0, 0.325);
+        coffinGroup.add(coffinLid);
+
+        const lidEdges = new THREE.EdgesGeometry(lidGeom);
+        const edgesMat = new THREE.LineBasicMaterial({
+          color: 0xff007f,
+          linewidth: 2,
+        });
+        coffinLid.add(new THREE.LineSegments(lidEdges, edgesMat));
+
+        // CRÁNEO DRACU EN EL ATAÚD (Textura)
+        const textureLoader = new THREE.TextureLoader();
+        // Carga la imagen desde la ruta de Flask
+        const dracuTexture = textureLoader.load("/static/dracu.png");
+        const dracuMat = new THREE.MeshBasicMaterial({
+          map: dracuTexture,
+          transparent: true,
+          depthWrite: false,
+        });
+        const dracuGeom = new THREE.PlaneGeometry(1.5, 1.5); // Tamaño del cráneo mejorado
+        const dracuMesh = new THREE.Mesh(dracuGeom, dracuMat);
+        dracuMesh.position.set(0, 0, 0.12); // Flotando justo encima de la tapa
+        coffinLid.add(dracuMesh);
+
+        coffinLid.cracks = new THREE.Group();
+        coffinLid.add(coffinLid.cracks);
+
+        // PASTEL 3D CORREGIDO (APILADO EN EJE Y PARA PERSPECTIVA DE MESA)
+        cakeGroup3D = new THREE.Group();
+        cakeGroup3D.scale.set(0, 0, 0);
+        // Lo ponemos de pie (rotando su contenedor base) y lo bajamos para que parezca estar en el fondo del ataud
+        cakeGroup3D.position.set(0, -0.6, -0.2);
+        cakeGroup3D.rotation.set(0.15, 0, 0); // Ligeramente inclinado para ver la parte superior
+        coffinGroup.add(cakeGroup3D);
+
+        const tierMat1 = new THREE.MeshStandardMaterial({
+          color: 0x0c0612,
+          roughness: 0.85,
+        });
+        const tierMat2 = new THREE.MeshStandardMaterial({
+          color: 0xff007f,
+          roughness: 0.6,
+        });
+        const tierMat3 = new THREE.MeshStandardMaterial({
+          color: 0x1c0f2a,
+          roughness: 0.7,
+        });
+
+        // AHORA LAS CAPAS CRECEN HACIA ARRIBA EN Y (No en Z, arreglando el fallo de perspectiva vertical)
+        const t1 = new THREE.Mesh(
+          new THREE.CylinderGeometry(0.85, 0.85, 0.45, 32),
+          tierMat1,
+        );
+        t1.position.y = 0.225; // Apilando en el eje Y
+        cakeGroup3D.add(t1);
+
+        const t2 = new THREE.Mesh(
+          new THREE.CylinderGeometry(0.65, 0.65, 0.45, 32),
+          tierMat2,
+        );
+        t2.position.y = 0.675;
+        cakeGroup3D.add(t2);
+
+        const t3 = new THREE.Mesh(
+          new THREE.CylinderGeometry(0.45, 0.45, 0.45, 32),
+          tierMat3,
+        );
+        t3.position.y = 1.125;
+        cakeGroup3D.add(t3);
+
+        const candleGeom = new THREE.CylinderGeometry(0.03, 0.03, 0.18, 8);
+        const candleMat = new THREE.MeshBasicMaterial({ color: 0xffffff });
+        const flameGeom = new THREE.SphereGeometry(0.06, 8, 8);
+        const flameMat = new THREE.MeshBasicMaterial({ color: 0xffaa00 });
+
+        for (let i = 0; i < 3; i++) {
+          const cGroup = new THREE.Group();
+          const candle = new THREE.Mesh(candleGeom, candleMat);
+          const flame = new THREE.Mesh(flameGeom, flameMat);
+          flame.position.y = 0.13;
+          cGroup.add(candle);
+          cGroup.add(flame);
+          const angle = (i / 3) * Math.PI * 2;
+          cGroup.position.set(
+            Math.cos(angle) * 0.25,
+            1.44,
+            Math.sin(angle) * 0.25,
+          );
+          cakeGroup3D.add(cGroup);
+          animFlames.push(flame);
+        }
+      }
+
+      let lastCrackPoint = { x: 0, y: 1.0 };
+      function growLidCrack() {
+        const nextX = lastCrackPoint.x + (Math.random() - 0.5) * 0.6;
+        const nextY = lastCrackPoint.y - 0.35 - Math.random() * 0.15;
+        const points = [
+          new THREE.Vector3(lastCrackPoint.x, lastCrackPoint.y, 0.15),
+          new THREE.Vector3(nextX, nextY, 0.15),
+        ];
+        const crackLine = new THREE.Line(
+          new THREE.BufferGeometry().setFromPoints(points),
+          new THREE.LineBasicMaterial({ color: 0x00ffcc, linewidth: 5 }),
+        );
+        coffinLid.cracks.add(crackLine);
+        lastCrackPoint = { x: nextX, y: nextY };
+      }
+
+      let targetMouseX = 0,
+        targetMouseY = 0;
+      let currentMouseX = 0,
+        currentMouseY = 0;
+
+      // Eventos de ratón / táctiles para el Parallax
+      document.addEventListener("mousemove", (e) => {
+        targetMouseX = (e.clientX / window.innerWidth) * 2 - 1;
+        targetMouseY = -(e.clientY / window.innerHeight) * 2 + 1;
+      });
+      document.addEventListener("touchmove", (e) => {
+        targetMouseX = (e.touches[0].clientX / window.innerWidth) * 2 - 1;
+        targetMouseY = -(e.touches[0].clientY / window.innerHeight) * 2 + 1;
+      });
+
+      // ----------------------------------------------------
+      // BUCLE DE ANIMACIÓN 3D PRINCIPAL (Render Loop)
+      // Esta función se llama a sí misma 60 veces por segundo.
+      // Se encarga de calcular el movimiento del parallax con el ratón,
+      // animar las llamas de las velas y renderizar la escena en el Canvas.
+      // ----------------------------------------------------
+      function runThreeAnimation() {
+        requestAnimationFrame(runThreeAnimation);
+        currentMouseX += (targetMouseX - currentMouseX) * 0.05;
+        currentMouseY += (targetMouseY - currentMouseY) * 0.05;
+
+        if (coffinGroup && clickCount < 7) {
+          coffinGroup.rotation.y = -0.3 + currentMouseX * 0.5;
+          coffinGroup.rotation.x = 0.35 - currentMouseY * 0.5;
+        } else if (clickCount >= 7) {
+          coffinGroup.rotation.y += 0.005;
+          coffinGroup.position.y = Math.sin(Date.now() * 0.0015) * 0.15;
+        }
+
+        if (starField) {
+          starField.rotation.y += 0.0008;
+          starField.rotation.x += 0.0004;
+        }
+
+        animFlames.forEach((flame, index) => {
+          const mod = 1.0 + Math.sin(Date.now() * 0.02 + index * 400) * 0.25;
+          flame.scale.set(mod, mod * 1.4, mod);
+        });
+
+        updateAndDrawFog();
+        updateOrbitingStickers();
+        renderer.render(scene, camera);
+      }
+
+      // ----------------------------------------------------
+      // LÓGICA DE 7 CLICKS
+      // ----------------------------------------------------
+      let clickCount = 0;
+      const progressFill = document.getElementById("sync-progress");
+      const progressVal = document.getElementById("sync-val");
+      const instructionText = document.getElementById("instruction-text");
+
+      window.addEventListener("click", (e) => {
+        if (
+          e.target.closest("#letter-panel") ||
+          e.target.closest(".goth-terminal") ||
+          e.target.closest(".goth-btn") ||
+          e.target.closest("input")
+        )
+          return;
+        if (clickCount >= 7) return;
+
+        clickCount++;
+        if (clickCount === 1) {
+          instructionText.style.display = "none";
+        } // Ocultar texto guía al iniciar
+
+        progressVal.innerText = clickCount;
+        progressFill.style.width = `${(clickCount / 7) * 100}%`;
+        shake3Dcoffin();
+        flashGlitchScreen();
+
+        if (clickCount === 1) {
+          synth.playClick();
+          growLidCrack();
+        } else if (clickCount === 2) {
+          synth.playGIR();
+          growLidCrack();
+          triggerGIRFlyby();
+          showWarningBanner("GIR_DETECTOR: OVERLOAD");
+        } else if (clickCount === 3) {
+          synth.playLullaby();
+          growLidCrack();
+          revealFluttergothShadow();
+        } else if (clickCount === 4) {
+          synth.playGlitch();
+          growLidCrack();
+          spawnRosesRain(25);
+        } else if (clickCount === 5) {
+          synth.playGIR();
+          growLidCrack();
+          orbitFlugirSticker();
+        } else if (clickCount === 6) {
+          synth.playGlitch();
+          growLidCrack();
+          triggerPolaroidReveal();
+          showWarningBanner("ERROR: SOPHIE CORE MELTDOWN");
+        } else if (clickCount === 7) {
+
+          // --- NUEVO: OCULTAR ELEMENTOS ---
+
+          // 1. Ocultar el cuerpo del ataúd 3D para que no se mezcle con el pastel
+          if (typeof coffinBody !== 'undefined' && coffinBody) {
+              gsap.to(coffinBody.material, { opacity: 0, transparent: true, duration: 1.0 });
+              setTimeout(() => { coffinBody.visible = false; }, 1000);
+          }
+
+          // 2. Ocultar la calavera y el texto de instrucción
+          const instruccion = document.getElementById('instruccion-ataud');
+          if (instruccion) {
+              instruccion.style.display = 'none';
+          }
+
+          // ---------------------------------
+
+          // 3. Aparece el pastel y el caos final
+          triggerFinalExplosion();
+        }
+      });
+
+      // El mismo soporte de eventos para Mobile Touch
+      window.addEventListener("touchstart", (e) => {
+        if (
+          e.target.closest("#letter-panel") ||
+          e.target.closest(".goth-terminal") ||
+          e.target.closest(".goth-btn") ||
+          e.target.closest("input")
+        )
+          return;
+        // Evitar doble firing si hay click listener en ciertos móviles
+      });
+
+      function shake3Dcoffin() {
+        if (!coffinGroup) return;
+        gsap.fromTo(
+          coffinGroup.position,
+          { x: -0.15 },
+          {
+            x: 0.15,
+            repeat: 7,
+            yoyo: true,
+            duration: 0.05,
+            onComplete: () => {
+              coffinGroup.position.x = 0;
+            },
+          },
+        );
+      }
+
+      function flashGlitchScreen() {
+        gsap.fromTo(
+          document.getElementById("flash-overlay"),
+          { opacity: 0.8 },
+          { opacity: 0, duration: 0.4 },
+        );
+      }
+
+      function triggerGIRFlyby() {
+        const gir = document.getElementById("gir-flyer");
+        gir.style.top = `${Math.random() * 40 + 20}%`;
+        gsap.fromTo(
+          gir,
+          { left: "-200px", opacity: 1, rotation: 0 },
+          {
+            left: "110%",
+            rotation: 360,
+            duration: 2.2,
+            onComplete: () => (gir.style.opacity = 0),
+          },
+        );
+      }
+
+      function revealFluttergothShadow() {
+        const fWin = document.getElementById("flutter-goth-shadow");
+        gsap.to(fWin, {
+          opacity: 1,
+          scale: 1.0,
+          duration: 1.2,
+          ease: "elastic.out(1, 0.7)",
+        });
+        gsap.to(fWin, {
+          y: "+=15",
+          repeat: -1,
+          yoyo: true,
+          duration: 2.5,
+          ease: "sine.inOut",
+        });
+      }
+
+      function spawnRosesRain(n) {
+        for (let i = 0; i < n; i++) {
+          const rose = document.createElement("div");
+          rose.className = "falling-rose";
+          const isHeart = Math.random() > 0.5;
+          const isBlack = Math.random() > 0.4;
+          let color = isBlack ? "#150a1d" : "#ff0055";
+          if (!isBlack && Math.random() > 0.5) color = "#8800ff";
+          if (isHeart) {
+            rose.innerHTML = `<svg width="50" height="50" viewBox="0 0 24 24"><path d="M12 21.35l-1.45-1.32C5.4 15.36 2 12.28 2 8.5 2 5.42 4.42 3 7.5 3c1.74 0 3.41.81 4.5 2.09C13.09 3.81 14.76 3 16.5 3 19.58 3 22 5.42 22 8.5c0 3.78-3.4 6.86-8.55 11.54L12 21.35z" fill="${color}" stroke="%23000" stroke-width="1"/></svg>`;
+          } else {
+            rose.innerHTML = `<svg width="80" height="80" viewBox="0 0 24 24"><path d="M12 2C6.48 2 2 6.48 2 12s4.48 10 10 10 10-4.48 10-10S17.52 2 12 2zm1 15.93c-3.13-.48-5.5-3.21-5.5-6.43 0-.74.13-1.46.38-2.12l1.97 1.97c-.02.05-.05.15-.05.15 0 1.2.98 2.18 2.18 2.18.05 0 .1-.02.15-.05l1.97 1.97c-.66.25-1.38.38-2.12.38-.41 0-.8-.06-1.18-.18l-.94.94C11.56 16.88 12.26 17 13 17c.55 0 1.07-.07 1.57-.2l.93-.93c-.45.38-.97.68-1.5.86v1.2zm2.84-2.84l-.93.93c.13-.5.2-1.02.2-1.57 0-.74-.12-1.44-.33-2.09l.94-.94c.25.66.38 1.38.38 2.12 0 .55-.07 1.07-.2 1.57l-.06.98z" fill="${color}"/></svg>`;
+          }
+          document.body.appendChild(rose);
+          const startX = Math.random() * window.innerWidth;
+          rose.style.position = "absolute";
+          rose.style.left = `${startX}px`;
+          rose.style.top = `-40px`;
+          rose.style.zIndex = "8";
+          rose.style.filter = `drop-shadow(0 0 8px ${color})`;
+          rose.style.transform = `scale(${Math.random() * 0.7 + 0.5})`;
+          gsap.fromTo(
+            rose,
+            { y: -40, rotation: 0 },
+            {
+              y: window.innerHeight + 80,
+              x: startX + (Math.random() - 0.5) * 250,
+              rotation: (Math.random() - 0.5) * 540,
+              duration: 3.5 + Math.random() * 2.5,
+              ease: "none",
+              onComplete: () => rose.remove(),
+            },
+          );
+        }
+      }
+
+      function orbitFlugirSticker() {
+        const fg = document.getElementById("flugir-sticker");
+        fg.style.left = "50%";
+        fg.style.top = "50%";
+        fg.style.transform = "translate(-50%, -50%) scale(0)";
+        gsap.to(fg, {
+          opacity: 1,
+          scale: 1.2,
+          rotation: 360,
+          duration: 1.5,
+          ease: "back.out(1.7)",
+          onComplete: () => {
+            gsap.to(fg, {
+              y: "+=25",
+              x: "+=15",
+              rotation: "+=10",
+              repeat: -1,
+              yoyo: true,
+              duration: 2.0,
+              ease: "sine.inOut",
+            });
+          },
+        });
+      }
+
+      function triggerPolaroidReveal() {
+        const pol1 = document.getElementById("polaroid-widget");
+        const pol2 = document.getElementById("polaroid-widget-2"); // Seleccionamos el nuevo
+
+        // Animación del primer polaroid
+        gsap.to(pol1, { scale: 1.0, rotation: -8, duration: 1.2, ease: "back.out(1.5)",
+          onComplete: () => { gsap.to(pol1, { y: "+=10", repeat: -1, yoyo: true, duration: 3, ease: "sine.inOut" }); }
+        });
+
+        // Animación del nuevo polaroid (le ponemos otra rotación para que se vea genial)
+        gsap.to(pol2, { scale: 1.0, rotation: 12, duration: 1.2, ease: "back.out(1.5)",
+          onComplete: () => { gsap.to(pol2, { y: "-=10", repeat: -1, yoyo: true, duration: 2.5, ease: "sine.inOut" }); }
+        });
+      }
+
+      function showWarningBanner(msg) {
+        const banner = document.getElementById("warn-banner");
+        banner.innerText = msg;
+        gsap
+          .timeline()
+          .to(banner, { opacity: 1, scale: 1.1, duration: 0.3 })
+          .to(banner, { scale: 1.0, duration: 0.1 })
+          .to(banner, { opacity: 0, delay: 2.0, duration: 0.5 });
+      }
+
+      // ----------------------------------------------------
+      // ANIMACIÓN DE EXPLOSIÓN FINAL (CLIC 7)
+      // Función que oculta el ataúd, revela el pastel,
+      // reproduce la música y hace aparecer la interfaz de Winamp
+      // ----------------------------------------------------
+      function triggerFinalExplosion() {
+        synth.playExplosion();
+        synth.playSuccess();
+        flashGlitchScreen();
+        spawnRosesRain(140);
+
+        // Aparece sutilmente la foto de sofi en el fondo
+        const finalBg = document.getElementById("final-bg");
+        if (finalBg) {
+          gsap.to(finalBg, { opacity: 1, duration: 4.0, ease: "power2.inOut" });
+        }
+
+        document.getElementById("term-status-3").style.color =
+          "var(--neon-green)";
+        document.getElementById("term-status-3").innerText = "UNLOCKED_SOPHIE";
+
+        // Minimizar la terminal
+        const term = document.getElementById("main-terminal");
+        if (term) term.classList.add("minimized");
+        const termContent = document.getElementById("terminal-content");
+        if (termContent) gsap.to(termContent, { height: 0, opacity: 0, duration: 0.5, onComplete: () => termContent.style.display = 'none' });
+
+        gsap.to(document.getElementById("progress-panel"), {
+          opacity: 0,
+          y: 100,
+          duration: 0.8,
+        });
+
+        if (coffinLid) {
+          gsap.to(coffinLid.position, {
+            x: -6.0,
+            y: 4.0,
+            z: 6.0,
+            duration: 2.2,
+            ease: "power2.out",
+          });
+          gsap.to(coffinLid.rotation, {
+            x: 4.5,
+            y: 5.0,
+            z: 2.0,
+            duration: 2.2,
+          });
+          gsap.to(coffinLid.scale, { x: 0, y: 0, z: 0, duration: 2.2 });
+        }
+
+        if (cakeGroup3D) {
+          // El pastel se eleva y crece con perspectiva real 3D
+          gsap.to(cakeGroup3D.scale, {
+            x: 1.4,
+            y: 1.4,
+            z: 1.4,
+            delay: 0.4,
+            duration: 1.5,
+            ease: "back.out(1.5)",
+          });
+          gsap.to(cakeGroup3D.position, {
+            y: 0.2, /* Subido de -0.6 a 0.2 */
+            z: 0.4,
+            delay: 0.4,
+            duration: 1.5,
+          });
+          // Enderezamos el pastel respecto a la inclinación del contenedor
+          gsap.to(cakeGroup3D.rotation, { x: 0, y: 0, z: 0, duration: 1.5 });
+          // Ajustamos suavemente la rotación de todo el contenedor para "sentarlo" en la pantalla
+          gsap.to(coffinGroup.rotation, { x: 0.15, y: 0, z: 0, duration: 1.5 });
+        }
+
+        if (starField)
+          gsap.to(starField.rotation, {
+            y: "+=3.5",
+            x: "+=1.8",
+            duration: 4.5,
+            ease: "power2.out",
+          });
+
+        gsap.to(
+          [
+            document.getElementById("flutter-goth-shadow"),
+            document.getElementById("polaroid-widget"),
+            document.getElementById("polaroid-widget-2"),
+            document.getElementById("flugir-sticker"),
+          ],
+          { opacity: 0, scale: 0, duration: 0.8 },
+        );
+        setTimeout(() => {
+          spawnOrbitingStickers();
+        }, 1200);
+
+        gsap.to("#letter-panel", {
+          bottom: "15px",
+          duration: 1.8,
+          ease: "back.out(1.2)",
+          onComplete: () => {
+            // Reproducir música MP3 automáticamente al final
+            bgAudio.play().catch(e => console.log("Auto-play preveido por el navegador", e));
+            isPlayingMp3 = true;
+            document.getElementById("btn-play-music").innerText =
+              "PAUSAR MÚSICA";
+            document.getElementById("player-ticker").innerText = "NOW PLAYING: Nightcore - I Don't Know (Lyrics).MP3";
+          },
+        });
+      }
+
+      // ----------------------------------------------------
+      // CARRUSEL STICKERS ÓRBITA 3D (THREE.JS SPRITES)
+      // Aquí puedes agregar nuevas imágenes al array `stickersData`.
+      // El script las cargará como texturas y las convertirá en planos
+      // que orbitarán dinámicamente alrededor del pastel 3D.
+      // ----------------------------------------------------
+      const stickersData = [
+        { src: "/static/gir1.jpeg" },
+        { src: "/static/gir2.jpeg" },
+        { src: "/static/fluttergoth.jpeg" },
+        { src: "/static/flugir.jpeg" },
+        { src: "/static/sogir.jpeg" },
+        { src: "/static/y2k.png.jpeg" },
+      ];
+      let orbitingStickers = [];
+
+      function spawnOrbitingStickers() {
+        const sceneEl = document.getElementById("scene");
+        sceneEl.innerHTML = ""; // Limpiar cualquier imagen DOM residual
+
+        const texLoader = new THREE.TextureLoader();
+        stickersData.forEach((data, idx) => {
+          texLoader.load(data.src, (texture) => {
+            const material = new THREE.SpriteMaterial({ map: texture, transparent: true });
+            const sprite = new THREE.Sprite(material);
+
+            // Mantener proporciones
+            let aspect = 1;
+            if (texture.image && texture.image.width) {
+              aspect = texture.image.width / texture.image.height;
+            }
+            const baseScale = window.innerWidth > 600 ? 1.5 : 1.0;
+            sprite.scale.set(baseScale * aspect, baseScale, 1);
+
+            // Añadir atributos para el Raycaster
+            sprite.userData = {
+              baseScaleX: baseScale * aspect,
+              baseScaleY: baseScale
+            };
+
+            // Añadir al grupo principal del ataúd
+            if (coffinGroup) {
+              coffinGroup.add(sprite);
+            }
+
+            orbitingStickers.push({
+              sprite: sprite,
+              angle: (idx / stickersData.length) * Math.PI * 2,
+              radiusXZ: window.innerWidth > 600 ? 2.2 + Math.random() * 0.4 : 1.5 + Math.random() * 0.3,
+              speed: 0.01 + Math.random() * 0.005,
+              yOffset: (Math.random() - 0.5) * 1.5,
+            });
+          });
+        });
+
+        // Configurar Raycaster para interactividad de Sprites
+        if (!window.raycasterSetup) {
+          window.raycasterSetup = true;
+          const raycaster = new THREE.Raycaster();
+          const mouseV = new THREE.Vector2();
+          let hoveredSticker = null;
+
+          const onPointerMove = (e) => {
+            let cx = e.clientX;
+            let cy = e.clientY;
+            if (e.touches && e.touches.length > 0) {
+              cx = e.touches[0].clientX;
+              cy = e.touches[0].clientY;
+            }
+            mouseV.x = (cx / window.innerWidth) * 2 - 1;
+            mouseV.y = -(cy / window.innerHeight) * 2 + 1;
+
+            raycaster.setFromCamera(mouseV, camera);
+            if (orbitingStickers.length > 0) {
+              const sprites = orbitingStickers.map(st => st.sprite);
+              const intersects = raycaster.intersectObjects(sprites);
+
+              if (intersects.length > 0) {
+                const current = intersects[0].object;
+                if (hoveredSticker !== current) {
+                  if (hoveredSticker) {
+                     gsap.to(hoveredSticker.scale, {
+                        x: hoveredSticker.userData.baseScaleX,
+                        y: hoveredSticker.userData.baseScaleY,
+                        duration: 0.25
+                     });
+                  }
+                  hoveredSticker = current;
+                  synth.playClick();
+                  gsap.to(hoveredSticker.scale, {
+                     x: hoveredSticker.userData.baseScaleX * 1.35,
+                     y: hoveredSticker.userData.baseScaleY * 1.35,
+                     duration: 0.25
+                  });
+                  document.body.style.cursor = 'pointer';
+                }
+              } else {
+                if (hoveredSticker) {
+                  gsap.to(hoveredSticker.scale, {
+                     x: hoveredSticker.userData.baseScaleX,
+                     y: hoveredSticker.userData.baseScaleY,
+                     duration: 0.25
+                  });
+                  hoveredSticker = null;
+                  document.body.style.cursor = '';
+                }
+              }
+            }
+          };
+
+          window.addEventListener("mousemove", onPointerMove);
+          window.addEventListener("touchmove", onPointerMove);
+        }
+      }
+
+      function updateOrbitingStickers() {
+        orbitingStickers.forEach((st) => {
+          st.angle += st.speed;
+          // Orbitar alrededor del pastel en el plano XZ dentro del espacio 3D real
+          st.sprite.position.x = Math.cos(st.angle) * st.radiusXZ;
+          st.sprite.position.z = Math.sin(st.angle) * st.radiusXZ;
+          st.sprite.position.y = 0.6 + st.yOffset + Math.sin(Date.now() * 0.002 + st.angle) * 0.15; /* Subido de -0.2 a 0.6 */
+
+          st.sprite.material.opacity = 0.85 + (st.sprite.position.z / st.radiusXZ) * 0.15;
+        });
+      }
+
+      // ----------------------------------------------------
+      // LÓGICA DEL PANEL WINAMP (CARTA EDITABLE)
+      // ----------------------------------------------------
+      const msgView = document.getElementById("message-view"),
+        msgEdit = document.getElementById("message-edit"),
+        msgTextarea = document.getElementById("message-textarea"),
+        msgContent = document.getElementById("message-content");
+      const btnEdit = document.getElementById("btn-edit"),
+        btnSave = document.getElementById("btn-save"),
+        btnCancel = document.getElementById("btn-cancel"),
+        saveStatus = document.getElementById("save-status");
+
+      const initialMessage = JSON.parse(
+        document.getElementById("message-data").textContent,
+      );
+      displayMessage(initialMessage);
+      function displayMessage(msg) {
+        msgContent.innerHTML = msg.replace(/\n/g, "<br>");
+        msgTextarea.value = msg;
+      }
+
+      btnEdit.addEventListener("click", () => {
+        synth.playClick();
+        msgView.classList.add("hidden");
+        msgEdit.classList.remove("hidden");
+        btnEdit.classList.add("hidden");
+        btnSave.classList.remove("hidden");
+        btnCancel.classList.remove("hidden");
+        saveStatus.innerText = "MODO: EDITOR";
+      });
+      btnCancel.addEventListener("click", () => {
+        synth.playClick();
+        msgView.classList.remove("hidden");
+        msgEdit.classList.add("hidden");
+        btnEdit.classList.remove("hidden");
+        btnSave.classList.add("hidden");
+        btnCancel.classList.add("hidden");
+        saveStatus.innerText = "";
+      });
+      btnSave.addEventListener("click", () => {
+        synth.playClick();
+        const updatedMsg = msgTextarea.value;
+        saveStatus.innerText = "GUARDANDO...";
+        fetch("/save_message", {
+          method: "POST",
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify({ message: updatedMsg }),
+        })
+          .then((res) => res.json())
+          .then((data) => {
+            if (data.status === "success") {
+              displayMessage(updatedMsg);
+              msgView.classList.remove("hidden");
+              msgEdit.classList.add("hidden");
+              btnEdit.classList.remove("hidden");
+              btnSave.classList.add("hidden");
+              btnCancel.classList.add("hidden");
+              saveStatus.innerText = "GUARDADO";
+              setTimeout(() => (saveStatus.innerText = ""), 2000);
+            } else {
+              saveStatus.innerText = "ERROR AL GUARDAR";
+            }
+          })
+          .catch((err) => {
+            console.error(err);
+            saveStatus.innerText = "CONEXIÓN FALLIDA";
+          });
+      });
+
+      let isWinampMinimized = false;
+      function toggleWinampMinimize() {
+        synth.playClick();
+        const winContent = document.querySelector(".winamp-content"),
+          winFooter = document.querySelector(".winamp-footer"),
+          playerWidget = document.querySelector(".player-widget");
+        if (!isWinampMinimized) {
+          winContent.classList.add("hidden");
+          winFooter.classList.add("hidden");
+          playerWidget.classList.add("hidden");
+          isWinampMinimized = true;
+        } else {
+          winContent.classList.remove("hidden");
+          winFooter.classList.remove("hidden");
+          playerWidget.classList.remove("hidden");
+          isWinampMinimized = false;
+        }
+      }
+
+      const btnPlayMusic = document.getElementById("btn-play-music"),
+        volumeSlider = document.getElementById("volume-slider"),
+        playerTicker = document.getElementById("player-ticker");
+
+      btnPlayMusic.addEventListener("click", () => {
+        synth.init(); // Iniciar contexto de audio para los clicks
+        if (isPlayingMp3) {
+          bgAudio.pause();
+          isPlayingMp3 = false;
+          btnPlayMusic.innerText = "REPRODUCIR MÚSICA";
+          playerTicker.innerText = "PLAYER: EN PAUSA";
+        } else {
+          bgAudio.play().catch(e => console.log("Error al reproducir", e));
+          isPlayingMp3 = true;
+          btnPlayMusic.innerText = "PAUSAR MÚSICA";
+          playerTicker.innerText = "NOW PLAYING: Nightcore - I Don't Know (Lyrics).MP3";
+        }
+      });
+
+      volumeSlider.addEventListener("input", (e) => {
+        const val = e.target.value / 100;
+        synth.setVolume(val); // Mantiene control de volumen de efectos (clicks)
+        bgAudio.volume = val; // Mantiene control de volumen de la canción MP3
+      });
+
+      const termTick = document.getElementById("terminal-tick");
+      setInterval(() => {
+        termTick.innerText = Math.random() > 0.85 ? "SYS_ERR" : "SYS_OK";
+        termTick.style.color =
+          termTick.innerText === "SYS_ERR" ? "red" : "var(--neon-green)";
+      }, 1000);
+
+      initThree();
+      runThreeAnimation();
+    </script>
+  </body>
+</html>
