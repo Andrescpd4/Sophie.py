@@ -336,21 +336,83 @@
         backdrop-filter: blur(15px);
         font-family: "Inter", sans-serif;
       }
-    /* Responsive winamp window */
+    /* Responsive winamp window - solo afecta tamaño, NO posición bottom */
     @media (max-width: 600px) {
       .winamp-window {
-        bottom: -200px; /* bring it up */
-        width: 90%;
-        max-height: 300px;
+        width: 92%;
+        max-height: 45vh;
         overflow-y: auto;
       }
       .winamp-window .winamp-title-bar {
         font-size: 1rem;
       }
+      .winamp-window .winamp-content {
+        max-height: 18vh;
+        padding: 10px;
+      }
       .winamp-window .player-controls {
         flex-direction: column;
-        align-items: flex-start;
+        align-items: stretch;
       }
+    }
+
+    /* Modo pantalla completa del winamp */
+    .winamp-window.winamp-fullscreen {
+      position: fixed !important;
+      top: 0 !important;
+      left: 0 !important;
+      bottom: 0 !important;
+      right: 0 !important;
+      width: 100% !important;
+      max-width: 100% !important;
+      max-height: 100% !important;
+      height: 100% !important;
+      transform: none !important;
+      border-radius: 0;
+      z-index: 200;
+      display: flex;
+      flex-direction: column;
+    }
+    .winamp-window.winamp-fullscreen .winamp-content {
+      flex: 1;
+      max-height: none;
+      overflow-y: auto;
+    }
+    .winamp-window.winamp-fullscreen .message-display-pane {
+      font-size: 1.3rem;
+      line-height: 2;
+    }
+    .winamp-window.winamp-fullscreen .goth-textarea {
+      height: 100%;
+    }
+
+    /* Shake screen effect */
+    @keyframes screen-shake {
+      0% { transform: translate(0, 0); }
+      10% { transform: translate(-3px, 2px); }
+      20% { transform: translate(3px, -2px); }
+      30% { transform: translate(-2px, 3px); }
+      40% { transform: translate(2px, -3px); }
+      50% { transform: translate(-3px, 1px); }
+      60% { transform: translate(3px, -1px); }
+      70% { transform: translate(-1px, 3px); }
+      80% { transform: translate(1px, -3px); }
+      90% { transform: translate(-2px, 2px); }
+      100% { transform: translate(0, 0); }
+    }
+    body.music-shake {
+      animation: screen-shake 0.15s ease-in-out;
+    }
+
+    /* Pulso visual reactivo a la música */
+    #music-pulse-overlay {
+      position: fixed;
+      inset: 0;
+      pointer-events: none;
+      z-index: 1;
+      opacity: 0;
+      background: radial-gradient(circle at center, rgba(255,0,127,0.15) 0%, transparent 70%);
+      transition: opacity 0.08s ease-out;
     }
       .winamp-title-bar {
         background: linear-gradient(
@@ -624,6 +686,9 @@
       </div>
     </div>
 
+    <!-- Overlay de pulso reactivo a la música -->
+    <div id="music-pulse-overlay"></div>
+
     <div id="instruction-text" class="instruction-text">
       !HOLI, PEGALE AL ATAUD!!
     </div>
@@ -690,7 +755,7 @@
         <span class="winamp-title">SOPHIE_GOTH_PLAYER.EXE</span>
         <div class="winamp-controls">
           <span class="winamp-btn" onclick="toggleWinampMinimize()">-</span>
-          <span class="winamp-btn" onclick="synth.playClick()">□</span>
+          <span class="winamp-btn" onclick="toggleWinampFullscreen()">□</span>
           <span
             class="winamp-btn"
             onclick="alert('La dimension de Sophie es eterna.')"
@@ -1724,6 +1789,7 @@
           ease: "back.out(1.2)",
           onComplete: () => {
             // Reproducir música MP3 automáticamente al final
+            setupMusicReactive(); // Conectar analizador de audio
             bgAudio.play().catch(e => console.log("Auto-play preveido por el navegador", e));
             isPlayingMp3 = true;
             document.getElementById("btn-play-music").innerText =
@@ -1955,6 +2021,93 @@
         }
       }
 
+      // --- FULLSCREEN TOGGLE DEL WINAMP ---
+      let isWinampFullscreen = false;
+      function toggleWinampFullscreen() {
+        synth.playClick();
+        const panel = document.getElementById("letter-panel");
+        if (!isWinampFullscreen) {
+          panel.classList.add("winamp-fullscreen");
+          isWinampFullscreen = true;
+        } else {
+          panel.classList.remove("winamp-fullscreen");
+          isWinampFullscreen = false;
+        }
+      }
+
+      // --- EFECTOS REACTIVOS A LA MÚSICA ---
+      // Usa un AnalyserNode del Web Audio API para detectar "beats"
+      let audioCtxForAnalyser = null;
+      let analyserNode = null;
+      let analyserData = null;
+      let musicReactiveSetup = false;
+
+      function setupMusicReactive() {
+        if (musicReactiveSetup) return;
+        musicReactiveSetup = true;
+        try {
+          audioCtxForAnalyser = new (window.AudioContext || window.webkitAudioContext)();
+          const source = audioCtxForAnalyser.createMediaElementSource(bgAudio);
+          analyserNode = audioCtxForAnalyser.createAnalyser();
+          analyserNode.fftSize = 256;
+          analyserData = new Uint8Array(analyserNode.frequencyBinCount);
+          source.connect(analyserNode);
+          analyserNode.connect(audioCtxForAnalyser.destination);
+          requestAnimationFrame(musicReactiveLoop);
+        } catch (e) {
+          console.log("No se pudo configurar el analizador de audio:", e);
+        }
+      }
+
+      let lastShakeTime = 0;
+      const pulseOverlay = document.getElementById("music-pulse-overlay");
+
+      function musicReactiveLoop() {
+        requestAnimationFrame(musicReactiveLoop);
+        if (!analyserNode || !isPlayingMp3) {
+          if (pulseOverlay) pulseOverlay.style.opacity = "0";
+          return;
+        }
+        analyserNode.getByteFrequencyData(analyserData);
+
+        // Promediar las frecuencias bajas (bass) para detectar beats
+        let bass = 0;
+        const bassRange = Math.min(10, analyserData.length);
+        for (let i = 0; i < bassRange; i++) {
+          bass += analyserData[i];
+        }
+        bass = bass / bassRange;
+
+        // Promediar todas las frecuencias para el pulso general
+        let avg = 0;
+        for (let i = 0; i < analyserData.length; i++) {
+          avg += analyserData[i];
+        }
+        avg = avg / analyserData.length;
+
+        // Pulso visual (overlay) proporcional a la energía general
+        const pulseIntensity = Math.min(avg / 180, 1.0) * 0.4;
+        if (pulseOverlay) {
+          pulseOverlay.style.opacity = String(pulseIntensity);
+        }
+
+        // Shake de pantalla en golpes de bass fuertes
+        const now = Date.now();
+        if (bass > 200 && now - lastShakeTime > 300) {
+          lastShakeTime = now;
+          document.body.classList.add("music-shake");
+          setTimeout(() => document.body.classList.remove("music-shake"), 150);
+        }
+
+        // Variación en el brillo/tinte del border del winamp según la música
+        const panel = document.getElementById("letter-panel");
+        if (panel && clickCount >= 7) {
+          const hue = Math.floor((avg / 255) * 60);
+          panel.style.borderColor = `hsl(${330 + hue}, 100%, ${40 + avg / 8}%)`;
+          panel.style.boxShadow = `0 0 ${avg / 6}px hsl(${330 + hue}, 100%, 50%), inset 0 0 ${avg / 12}px rgba(255,0,127,${avg / 800})`;
+        }
+      }
+
       const btnPlayMusic = document.getElementById("btn-play-music"),
         volumeSlider = document.getElementById("volume-slider"),
         playerTicker = document.getElementById("player-ticker");
@@ -1967,6 +2120,7 @@
           btnPlayMusic.innerText = "REPRODUCIR MÚSICA";
           playerTicker.innerText = "PLAYER: EN PAUSA";
         } else {
+          setupMusicReactive(); // Conectar analizador si aún no está conectado
           bgAudio.play().catch(e => console.log("Error al reproducir", e));
           isPlayingMp3 = true;
           btnPlayMusic.innerText = "PAUSAR MÚSICA";
