@@ -336,6 +336,22 @@
         backdrop-filter: blur(15px);
         font-family: "Inter", sans-serif;
       }
+    /* Responsive winamp window */
+    @media (max-width: 600px) {
+      .winamp-window {
+        bottom: -200px; /* bring it up */
+        width: 90%;
+        max-height: 300px;
+        overflow-y: auto;
+      }
+      .winamp-window .winamp-title-bar {
+        font-size: 1rem;
+      }
+      .winamp-window .player-controls {
+        flex-direction: column;
+        align-items: flex-start;
+      }
+    }
       .winamp-title-bar {
         background: linear-gradient(
           90deg,
