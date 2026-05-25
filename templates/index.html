@@ -130,7 +130,7 @@
         top: 20px;
         left: 20px;
         width: 320px;
-        background: rgba(10, 5, 15, 0.85);
+        background: rgba(0, 0, 0, 0);
         border: 1px solid var(--neon-pink);
         padding: 12px;
         font-family: "VT323", monospace;
@@ -140,13 +140,15 @@
         border-radius: 4px;
         backdrop-filter: blur(8px);
         transition: all 0.8s ease;
+        opacity: 100%;
       }
       .goth-terminal.minimized {
-        top: 10px;
-        left: 10px;
+        top: 100px;
+        left: 5px;
         width: auto !important;
-        padding: 6px 12px;
-        font-size: 0.9rem;
+        padding: 3px 6px;
+        font-size: 0.8rem;
+        opacity: 10%%;
       }
       .terminal-title {
         color: var(--neon-pink);
@@ -336,84 +338,110 @@
         backdrop-filter: blur(15px);
         font-family: "Inter", sans-serif;
       }
-    /* Responsive winamp window - solo afecta tamaño, NO posición bottom */
-    @media (max-width: 600px) {
-      .winamp-window {
-        width: 92%;
-        max-height: 45vh;
+      /* Responsive winamp window - solo afecta tamaño, NO posición bottom */
+      @media (max-width: 600px) {
+        .winamp-window {
+          width: 92%;
+          max-height: 45vh;
+          overflow-y: auto;
+        }
+        .winamp-window .winamp-title-bar {
+          font-size: 1rem;
+        }
+        .winamp-window .winamp-content {
+          max-height: 18vh;
+          padding: 10px;
+        }
+        .winamp-window .player-controls {
+          flex-direction: column;
+          align-items: stretch;
+        }
+      }
+
+      /* Modo pantalla completa del winamp */
+      .winamp-window.winamp-fullscreen {
+        position: fixed !important;
+        top: 0 !important;
+        left: 0 !important;
+        bottom: 0 !important;
+        right: 0 !important;
+        width: 100% !important;
+        max-width: 100% !important;
+        max-height: 100% !important;
+        height: 100% !important;
+        transform: none !important;
+        border-radius: 0;
+        z-index: 200;
+        display: flex;
+        flex-direction: column;
+      }
+      .winamp-window.winamp-fullscreen .winamp-content {
+        flex: 1;
+        max-height: none;
         overflow-y: auto;
       }
-      .winamp-window .winamp-title-bar {
-        font-size: 1rem;
+      .winamp-window.winamp-fullscreen .message-display-pane {
+        font-size: 1.3rem;
+        line-height: 2;
       }
-      .winamp-window .winamp-content {
-        max-height: 18vh;
-        padding: 10px;
+      .winamp-window.winamp-fullscreen .goth-textarea {
+        height: 100%;
       }
-      .winamp-window .player-controls {
-        flex-direction: column;
-        align-items: stretch;
+
+      /* Shake screen effect */
+      @keyframes screen-shake {
+        0% {
+          transform: translate(0, 0);
+        }
+        10% {
+          transform: translate(-30px, 2px);
+        }
+        20% {
+          transform: translate(3px, -2px);
+        }
+        30% {
+          transform: translate(-2px, 3px);
+        }
+        40% {
+          transform: translate(2px, -3px);
+        }
+        50% {
+          transform: translate(-3px, 1px);
+        }
+        60% {
+          transform: translate(3px, -1px);
+        }
+        70% {
+          transform: translate(-1px, 3px);
+        }
+        80% {
+          transform: translate(1px, -3px);
+        }
+        90% {
+          transform: translate(-2px, 2px);
+        }
+        100% {
+          transform: translate(0, 0);
+        }
       }
-    }
+      body.music-shake {
+        animation: screen-shake 0.06s ease-in-out;
+      }
 
-    /* Modo pantalla completa del winamp */
-    .winamp-window.winamp-fullscreen {
-      position: fixed !important;
-      top: 0 !important;
-      left: 0 !important;
-      bottom: 0 !important;
-      right: 0 !important;
-      width: 100% !important;
-      max-width: 100% !important;
-      max-height: 100% !important;
-      height: 100% !important;
-      transform: none !important;
-      border-radius: 0;
-      z-index: 200;
-      display: flex;
-      flex-direction: column;
-    }
-    .winamp-window.winamp-fullscreen .winamp-content {
-      flex: 1;
-      max-height: none;
-      overflow-y: auto;
-    }
-    .winamp-window.winamp-fullscreen .message-display-pane {
-      font-size: 1.3rem;
-      line-height: 2;
-    }
-    .winamp-window.winamp-fullscreen .goth-textarea {
-      height: 100%;
-    }
-
-    /* Shake screen effect */
-    @keyframes screen-shake {
-      0% { transform: translate(0, 0); }
-      10% { transform: translate(-3px, 2px); }
-      20% { transform: translate(3px, -2px); }
-      30% { transform: translate(-2px, 3px); }
-      40% { transform: translate(2px, -3px); }
-      50% { transform: translate(-3px, 1px); }
-      60% { transform: translate(3px, -1px); }
-      70% { transform: translate(-1px, 3px); }
-      80% { transform: translate(1px, -3px); }
-      90% { transform: translate(-2px, 2px); }
-      100% { transform: translate(0, 0); }
-    }
-    body.music-shake {
-      animation: screen-shake 0.15s ease-in-out;
-    }
-
-    /* Pulso visual reactivo a la música */
-    #music-pulse-overlay {
-      position: fixed;
-      inset: 0;
-      pointer-events: none;
-      z-index: 1;
-      opacity: 0;
-      background: radial-gradient(circle at center, rgba(255,0,127,0.15) 0%, transparent 70%);
-      transition: opacity 0.08s ease-out;
-    }
+      /* Pulso visual reactivo a la música */
+      #music-pulse-overlay {s
+        position: fixed;
+        inset: 0;
+        pointer-events: none;
+        z-index: 1;
+        opacity: 0;
+        background: radial-gradient(
+          circle at center,
+          rgba(255, 0, 127, 0.15) 0%,
+          transparent 70%
+        );
+        transition: opacity 0.08s ease-out;
+      }
       .winamp-title-bar {
         background: linear-gradient(
           90deg,
@@ -474,6 +502,19 @@
         }
         100% {
           transform: translate3d(-100%, 0, 0);
+        }
+      }
+
+      .text-anv {
+        display: inline-block;
+        animation: text-animv 1s linear infinite;
+      }
+      @keyframes text-animv {
+        0% {
+          transform: translate3d(0, 100%, 0);
+        }
+        100% {
+          transform: translate3d(0, -100%, 0);
         }
       }
 
@@ -694,6 +735,18 @@
     </div>
     <div class="warning-overlay" id="warn-banner">GIR_DETECTOR: OVERLOAD</div>
 
+    <div class="text-anv" style="position: absolute; top: 50%; left: 10%; transform: translate(-50%, -50%); z-index: 20; text-align: center; pointer-events: none;">
+    <h2
+      style="
+        color: var(--neon-green);
+        font-family: &quot;VT323&quot;, monospace;
+        font-size: 2rem;
+        text-shadow: 0 0 15px var(--neon-green);
+        margin-top: 10px;
+      "
+    >♡</h2>
+  </div>
+
     <div class="polaroid-frame" id="polaroid-widget">
       <img
         src="/static/sogir.jpeg"
@@ -712,6 +765,7 @@
       <img src="/static/gir1.jpeg" class="polaroid-img" alt="Otra Foto" />
       <div>TQM SOPHIE</div>
     </div>
+
 
     <div class="flutter-window" id="flutter-goth-shadow">
       <img
@@ -793,7 +847,7 @@
       <div class="winamp-content">
         <div class="message-display-pane" id="message-view">
           <div id="message-content"></div>
-          <img src="/static/yo.jpeg" alt="muak" width="100" height="100">
+          <img src="/static/yo.jpeg" alt="muak" width="100" height="100" />
         </div>
         <div class="message-edit-pane hidden" id="message-edit">
           <textarea id="message-textarea" class="goth-textarea"></textarea>
@@ -1077,7 +1131,9 @@
       const synth = new CyberSynth();
 
       // NUEVO: Configuración de la música en MP3
-      const bgAudio = new Audio("/static/Nightcore - I Don't Know (Lyrics).mp3");
+      const bgAudio = new Audio(
+        "/static/Nightcore - I Don't Know (Lyrics).mp3",
+      );
       bgAudio.loop = true;
       bgAudio.volume = 0.5;
       let isPlayingMp3 = false;
@@ -1213,7 +1269,6 @@
         greenPointLight.position.set(-3, -3, 3);
         scene.add(greenPointLight);
 
-
         // Estrellas Neon Galaxy
         const starCount = 350;
         const starGeom = new THREE.BufferGeometry();
@@ -1337,7 +1392,7 @@
         coffinGroup.add(cakeGroup3D);
 
         const tierMat1 = new THREE.MeshStandardMaterial({
-          color: 0x9BDBF5,
+          color: 0x9bdbf5,
           roughness: 0.85,
         });
         const tierMat2 = new THREE.MeshStandardMaterial({
@@ -1345,7 +1400,7 @@
           roughness: 0.6,
         });
         const tierMat3 = new THREE.MeshStandardMaterial({
-          color: 0x632E86,
+          color: 0x632e86,
           roughness: 0.7,
         });
 
@@ -1513,19 +1568,24 @@
           triggerPolaroidReveal();
           showWarningBanner("ERROR: SOPHIE CORE MELTDOWN");
         } else if (clickCount === 7) {
-
           // --- NUEVO: OCULTAR ELEMENTOS ---
 
           // 1. Ocultar el cuerpo del ataúd 3D para que no se mezcle con el pastel
-          if (typeof coffinBody !== 'undefined' && coffinBody) {
-              gsap.to(coffinBody.material, { opacity: 0, transparent: true, duration: 1.0 });
-              setTimeout(() => { coffinBody.visible = false; }, 1000);
+          if (typeof coffinBody !== "undefined" && coffinBody) {
+            gsap.to(coffinBody.material, {
+              opacity: 0,
+              transparent: true,
+              duration: 1.0,
+            });
+            setTimeout(() => {
+              coffinBody.visible = false;
+            }, 1000);
           }
 
           // 2. Ocultar la calavera y el texto de instrucción
-          const instruccion = document.getElementById('instruccion-ataud');
+          const instruccion = document.getElementById("instruccion-ataud");
           if (instruccion) {
-              instruccion.style.display = 'none';
+            instruccion.style.display = "none";
           }
 
           // ---------------------------------
@@ -1670,13 +1730,37 @@
         const pol2 = document.getElementById("polaroid-widget-2"); // Seleccionamos el nuevo
 
         // Animación del primer polaroid
-        gsap.to(pol1, { scale: 1.0, rotation: -8, duration: 1.2, ease: "back.out(1.5)",
-          onComplete: () => { gsap.to(pol1, { y: "+=10", repeat: -1, yoyo: true, duration: 3, ease: "sine.inOut" }); }
+        gsap.to(pol1, {
+          scale: 1.0,
+          rotation: -8,
+          duration: 1.2,
+          ease: "back.out(1.5)",
+          onComplete: () => {
+            gsap.to(pol1, {
+              y: "+=10",
+              repeat: -1,
+              yoyo: true,
+              duration: 3,
+              ease: "sine.inOut",
+            });
+          },
         });
 
         // Animación del nuevo polaroid (le ponemos otra rotación para que se vea genial)
-        gsap.to(pol2, { scale: 1.0, rotation: 12, duration: 1.2, ease: "back.out(1.5)",
-          onComplete: () => { gsap.to(pol2, { y: "-=10", repeat: -1, yoyo: true, duration: 2.5, ease: "sine.inOut" }); }
+        gsap.to(pol2, {
+          scale: 1.0,
+          rotation: 12,
+          duration: 1.2,
+          ease: "back.out(1.5)",
+          onComplete: () => {
+            gsap.to(pol2, {
+              y: "-=10",
+              repeat: -1,
+              yoyo: true,
+              duration: 2.5,
+              ease: "sine.inOut",
+            });
+          },
         });
       }
 
@@ -1715,7 +1799,13 @@
         const term = document.getElementById("main-terminal");
         if (term) term.classList.add("minimized");
         const termContent = document.getElementById("terminal-content");
-        if (termContent) gsap.to(termContent, { height: 0, opacity: 0, duration: 0.5, onComplete: () => termContent.style.display = 'none' });
+        if (termContent)
+          gsap.to(termContent, {
+            height: 0,
+            opacity: 0,
+            duration: 0.5,
+            onComplete: () => (termContent.style.display = "none"),
+          });
 
         gsap.to(document.getElementById("progress-panel"), {
           opacity: 0,
@@ -1751,7 +1841,7 @@
             ease: "back.out(1.5)",
           });
           gsap.to(cakeGroup3D.position, {
-            y: 0.2, /* Subido de -0.6 a 0.2 */
+            y: 0.2 /* Subido de -0.6 a 0.2 */,
             z: 0.4,
             delay: 0.4,
             duration: 1.5,
@@ -1790,11 +1880,16 @@
           onComplete: () => {
             // Reproducir música MP3 automáticamente al final
             setupMusicReactive(); // Conectar analizador de audio
-            bgAudio.play().catch(e => console.log("Auto-play preveido por el navegador", e));
+            bgAudio
+              .play()
+              .catch((e) =>
+                console.log("Auto-play preveido por el navegador", e),
+              );
             isPlayingMp3 = true;
             document.getElementById("btn-play-music").innerText =
               "PAUSAR MÚSICA";
-            document.getElementById("player-ticker").innerText = "NOW PLAYING: Nightcore - I Don't Know (Lyrics).MP3";
+            document.getElementById("player-ticker").innerText =
+              "NOW PLAYING: Nightcore - I Don't Know (Lyrics).MP3";
           },
         });
       }
@@ -1829,7 +1924,10 @@
         const texLoader = new THREE.TextureLoader();
         stickersData.forEach((data, idx) => {
           texLoader.load(data.src, (texture) => {
-            const material = new THREE.SpriteMaterial({ map: texture, transparent: true });
+            const material = new THREE.SpriteMaterial({
+              map: texture,
+              transparent: true,
+            });
             const sprite = new THREE.Sprite(material);
 
             // Mantener proporciones
@@ -1843,7 +1941,7 @@
             // Añadir atributos para el Raycaster
             sprite.userData = {
               baseScaleX: baseScale * aspect,
-              baseScaleY: baseScale
+              baseScaleY: baseScale,
             };
 
             // Añadir al grupo principal del ataúd
@@ -1854,7 +1952,10 @@
             orbitingStickers.push({
               sprite: sprite,
               angle: (idx / stickersData.length) * Math.PI * 2,
-              radiusXZ: window.innerWidth > 600 ? 2.2 + Math.random() * 0.4 : 1.5 + Math.random() * 0.3,
+              radiusXZ:
+                window.innerWidth > 600
+                  ? 2.2 + Math.random() * 0.4
+                  : 1.5 + Math.random() * 0.3,
               speed: 0.01 + Math.random() * 0.005,
               yOffset: (Math.random() - 0.5) * 1.5,
             });
@@ -1880,37 +1981,37 @@
 
             raycaster.setFromCamera(mouseV, camera);
             if (orbitingStickers.length > 0) {
-              const sprites = orbitingStickers.map(st => st.sprite);
+              const sprites = orbitingStickers.map((st) => st.sprite);
               const intersects = raycaster.intersectObjects(sprites);
 
               if (intersects.length > 0) {
                 const current = intersects[0].object;
                 if (hoveredSticker !== current) {
                   if (hoveredSticker) {
-                     gsap.to(hoveredSticker.scale, {
-                        x: hoveredSticker.userData.baseScaleX,
-                        y: hoveredSticker.userData.baseScaleY,
-                        duration: 0.25
-                     });
+                    gsap.to(hoveredSticker.scale, {
+                      x: hoveredSticker.userData.baseScaleX,
+                      y: hoveredSticker.userData.baseScaleY,
+                      duration: 0.25,
+                    });
                   }
                   hoveredSticker = current;
                   synth.playClick();
                   gsap.to(hoveredSticker.scale, {
-                     x: hoveredSticker.userData.baseScaleX * 1.35,
-                     y: hoveredSticker.userData.baseScaleY * 1.35,
-                     duration: 0.25
+                    x: hoveredSticker.userData.baseScaleX * 1.35,
+                    y: hoveredSticker.userData.baseScaleY * 1.35,
+                    duration: 0.25,
                   });
-                  document.body.style.cursor = 'pointer';
+                  document.body.style.cursor = "pointer";
                 }
               } else {
                 if (hoveredSticker) {
                   gsap.to(hoveredSticker.scale, {
-                     x: hoveredSticker.userData.baseScaleX,
-                     y: hoveredSticker.userData.baseScaleY,
-                     duration: 0.25
+                    x: hoveredSticker.userData.baseScaleX,
+                    y: hoveredSticker.userData.baseScaleY,
+                    duration: 0.25,
                   });
                   hoveredSticker = null;
-                  document.body.style.cursor = '';
+                  document.body.style.cursor = "";
                 }
               }
             }
@@ -1927,9 +2028,14 @@
           // Orbitar alrededor del pastel en el plano XZ dentro del espacio 3D real
           st.sprite.position.x = Math.cos(st.angle) * st.radiusXZ;
           st.sprite.position.z = Math.sin(st.angle) * st.radiusXZ;
-          st.sprite.position.y = 0.6 + st.yOffset + Math.sin(Date.now() * 0.002 + st.angle) * 0.15; /* Subido de -0.2 a 0.6 */
+          st.sprite.position.y =
+            0.6 +
+            st.yOffset +
+            Math.sin(Date.now() * 0.002 + st.angle) *
+              0.15; /* Subido de -0.2 a 0.6 */
 
-          st.sprite.material.opacity = 0.85 + (st.sprite.position.z / st.radiusXZ) * 0.15;
+          st.sprite.material.opacity =
+            0.85 + (st.sprite.position.z / st.radiusXZ) * 0.15;
         });
       }
 
@@ -2046,7 +2152,9 @@
         if (musicReactiveSetup) return;
         musicReactiveSetup = true;
         try {
-          audioCtxForAnalyser = new (window.AudioContext || window.webkitAudioContext)();
+          audioCtxForAnalyser = new (
+            window.AudioContext || window.webkitAudioContext
+          )();
           const source = audioCtxForAnalyser.createMediaElementSource(bgAudio);
           analyserNode = audioCtxForAnalyser.createAnalyser();
           analyserNode.fftSize = 256;
@@ -2121,10 +2229,11 @@
           playerTicker.innerText = "PLAYER: EN PAUSA";
         } else {
           setupMusicReactive(); // Conectar analizador si aún no está conectado
-          bgAudio.play().catch(e => console.log("Error al reproducir", e));
+          bgAudio.play().catch((e) => console.log("Error al reproducir", e));
           isPlayingMp3 = true;
           btnPlayMusic.innerText = "PAUSAR MÚSICA";
-          playerTicker.innerText = "NOW PLAYING: Nightcore - I Don't Know (Lyrics).MP3";
+          playerTicker.innerText =
+            "NOW PLAYING: Nightcore - I Don't Know (Lyrics).MP3";
         }
       });
 
