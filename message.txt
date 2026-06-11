@@ -7,4 +7,8 @@ Espero que te guste este pequeño detalle que programé para ti (va con cositas 
 
 (Si modificas algo podre leerlo después "Si es que todo me quedo bien XD 🥀🥀🥀")
 
+<<<<<<< HEAD
 — Brayan / Andrés 🕴️
+=======
+— Brayan / Andrés 🕴️
+>>>>>>> 4d3b671dc5f7f1b6e8eaae1614e2c7461c0a674c
