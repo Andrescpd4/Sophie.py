@@ -9,7 +9,7 @@
     <title>Para Sophie la personita mas linda que conoci ultimamente</title>
 
     <link
-      href="https://fonts.googleapis.com/css2?family=Creepster&family=New+Rocker&family=VT323&family=Inter:wght@300;400;600&display=swap"
+      href="https://fonts.googleapis.com/css2?family=New+Rocker&family=VT323&family=Inter:wght@300;400;600&display=swap"
       rel="stylesheet"
     />
 
@@ -454,6 +454,7 @@
         display: flex;
         justify-content: space-between;
         border-bottom: 2px solid var(--neon-pink);
+        will-change: transform;
       }
       .winamp-controls {
         display: flex;
@@ -639,10 +640,25 @@
           align-items: stretch;
         }
       }
+      .low-end .vhs-noise { display: none !important; }
+      .low-end .goth-terminal { -webkit-backdrop-filter: none !important; backdrop-filter: none !important; }
+      .low-end .scanlines { opacity: 0.15 !important; }
+      .low-end .crt-vignette { box-shadow: inset 0 0 30px rgba(0,0,0,0.5) !important; }
+      .low-end .sparkle-particle { display: none !important; }
+      .low-end body { cursor: auto !important; }
+      .low-end .goth-btn,
+      .low-end .winamp-btn,
+      .low-end #scene,
+      .low-end .sticker {
+        will-change: auto !important;
+      }
     </style>
   </head>
 
   <body>
+    <script>
+    (function(){var e=navigator;var le=e.hardwareConcurrency<=4||(e.deviceMemory!==undefined&&e.deviceMemory<=4)||/Android|webOS|iPhone|iPod|BlackBerry|Opera Mini|IEMobile/i.test(e.userAgent);if(le){document.documentElement.className='low-end'}})()
+    </script>
     <div
       id="instruccion-ataud"
       style="
@@ -687,7 +703,8 @@
       "
     >
       <img
-        src="/static/sofi.jpeg"
+        src="/static/sofi.webp"
+        onerror="this.onerror=null;this.src='/static/sofi.jpeg'"
         style="width: 100%; height: 50%; object-fit: cover; opacity: 0.35"
         alt="Sofi Background"
         onerror="this.style.display = 'none'"
@@ -749,10 +766,10 @@
 
     <div class="polaroid-frame" id="polaroid-widget">
       <img
-        src="/static/sogir.jpeg"
+        src="/static/sogir.webp"
         class="polaroid-img"
         alt="Sophie & GIR"
-        onerror="this.src = 'https://via.placeholder.com/200'"
+        onerror="this.onerror=null;this.src='/static/sogir.jpeg'"
       />
       <div>SOPHIE & GIR 2026</div>
     </div>
@@ -762,33 +779,33 @@
       id="polaroid-widget-2"
       style="top: 30%; left: 20%"
     >
-      <img src="/static/gir1.jpeg" class="polaroid-img" alt="Otra Foto" />
+      <img src="/static/gir1.webp" class="polaroid-img" alt="Otra Foto" onerror="this.onerror=null;this.src='/static/gir1.jpeg'" />
       <div>TQM SOPHIE</div>
     </div>
 
 
     <div class="flutter-window" id="flutter-goth-shadow">
       <img
-        src="/static/fluttergoth.jpeg"
+        src="/static/fluttergoth.webp"
         alt="Fluttergoth shadow"
-        onerror="this.src = 'https://via.placeholder.com/200'"
+        onerror="this.onerror=null;this.src='/static/fluttergoth.jpeg'"
       />
     </div>
 
     <div id="scene">
       <img
-        src="/static/gir2.jpeg"
+        src="/static/gir2.webp"
         class="sticker"
         id="gir-flyer"
         style="width: 140px; transform: scaleX(-1)"
-        onerror="this.style.display = 'none'"
+        onerror="this.onerror=null;this.src='/static/gir2.jpeg'"
       />
       <img
-        src="/static/flugir.jpeg"
+        src="/static/flugir.webp"
         class="sticker"
         id="flugir-sticker"
         style="width: 180px; border-radius: 10px"
-        onerror="this.style.display = 'none'"
+        onerror="this.onerror=null;this.src='/static/flugir.jpeg'"
       />
     </div>
 
@@ -847,7 +864,7 @@
       <div class="winamp-content">
         <div class="message-display-pane" id="message-view">
           <div id="message-content"></div>
-          <img src="/static/yo.jpeg" alt="muak" width="100" height="100" />
+          <img src="/static/yo.webp" alt="muak" width="100" height="100" onerror="this.onerror=null;this.src='/static/yo.jpeg'" />
         </div>
         <div class="message-edit-pane hidden" id="message-edit">
           <textarea id="message-textarea" class="goth-textarea"></textarea>
@@ -1130,6 +1147,11 @@
       }
       const synth = new CyberSynth();
 
+      // Detección de dispositivo de gama baja (misma apariencia, menos cómputo)
+      const isLowEnd = /Android|webOS|iPhone|iPod|BlackBerry|Opera Mini|IEMobile/i.test(navigator.userAgent) ||
+        navigator.hardwareConcurrency <= 4 ||
+        (navigator.deviceMemory !== undefined && navigator.deviceMemory <= 4);
+
       // NUEVO: Configuración de la música en MP3
       const bgAudio = new Audio(
         "/static/Nightcore - I Don't Know (Lyrics).mp3",
@@ -1146,7 +1168,8 @@
         fogCanvas.width = window.innerWidth;
         fogCanvas.height = window.innerHeight;
         fogParticles = [];
-        for (let i = 0; i < 12; i++) {
+        const particleCount = isLowEnd ? 5 : 12;
+        for (let i = 0; i < particleCount; i++) {
           fogParticles.push({
             x: Math.random() * fogCanvas.width,
             y: Math.random() * fogCanvas.height,
@@ -1206,6 +1229,7 @@
         createTrailSparkle(e.touches[0].clientX, e.touches[0].clientY);
       });
       function createTrailSparkle(x, y) {
+        if (isLowEnd) return;
         if (Math.random() > 0.4) return;
         const spark = document.createElement("div");
         spark.className = "sparkle-particle";
@@ -1255,9 +1279,9 @@
         );
         camera.position.set(0, 0, window.innerWidth < 600 ? 7.5 : 5.5);
 
-        renderer = new THREE.WebGLRenderer({ alpha: true, antialias: true });
+        renderer = new THREE.WebGLRenderer({ alpha: true, antialias: !isLowEnd });
         renderer.setSize(window.innerWidth, window.innerHeight);
-        renderer.setPixelRatio(Math.min(window.devicePixelRatio, 2));
+        renderer.setPixelRatio(isLowEnd ? 1 : Math.min(window.devicePixelRatio, 2));
         container.appendChild(renderer.domElement);
 
         const ambientLight = new THREE.AmbientLight(0x160c20, 1.4);
@@ -1270,7 +1294,7 @@
         scene.add(greenPointLight);
 
         // Estrellas Neon Galaxy
-        const starCount = 350;
+        const starCount = isLowEnd ? 120 : 350;
         const starGeom = new THREE.BufferGeometry();
         const starPositions = new Float32Array(starCount * 3);
         const starColors = new Float32Array(starCount * 3);
@@ -1369,7 +1393,7 @@
         // CRÁNEO DRACU EN EL ATAÚD (Textura)
         const textureLoader = new THREE.TextureLoader();
         // Carga la imagen desde la ruta de Flask
-        const dracuTexture = textureLoader.load("/static/dracu.png");
+        const dracuTexture = textureLoader.load("/static/dracu.webp");
         const dracuMat = new THREE.MeshBasicMaterial({
           map: dracuTexture,
           transparent: true,
@@ -1557,7 +1581,7 @@
         } else if (clickCount === 4) {
           synth.playGlitch();
           growLidCrack();
-          spawnRosesRain(25);
+          spawnRosesRain(isLowEnd ? 8 : 25);
         } else if (clickCount === 5) {
           synth.playGIR();
           growLidCrack();
@@ -1783,7 +1807,7 @@
         synth.playExplosion();
         synth.playSuccess();
         flashGlitchScreen();
-        spawnRosesRain(140);
+        spawnRosesRain(isLowEnd ? 40 : 140);
 
         // Aparece sutilmente la foto de sofi en el fondo
         const finalBg = document.getElementById("final-bg");
@@ -1901,19 +1925,19 @@
       // que orbitarán dinámicamente alrededor del pastel 3D.
       // ----------------------------------------------------
       const stickersData = [
-        { src: "/static/gir1.jpeg" },
-        { src: "/static/gir2.jpeg" },
-        { src: "/static/fluttergoth.jpeg" },
-        { src: "/static/flugir.jpeg" },
-        { src: "/static/sogir.jpeg" },
-        { src: "/static/y2k.png.jpeg" },
-        { src: "/static/ella.jpeg" },
-        { src: "/static/ella2.jpeg" },
-        { src: "/static/ella3.jpeg" },
-        { src: "/static/menos3.jpeg" },
-        { src: "/static/kany.jpeg" },
-        { src: "/static/wow.jpeg" },
-        { src: "/static/yo.jpeg" },
+        { src: "/static/gir1.webp" },
+        { src: "/static/gir2.webp" },
+        { src: "/static/fluttergoth.webp" },
+        { src: "/static/flugir.webp" },
+        { src: "/static/sogir.webp" },
+        { src: "/static/y2k.png.webp" },
+        { src: "/static/ella.webp" },
+        { src: "/static/ella2.webp" },
+        { src: "/static/ella3.webp" },
+        { src: "/static/menos3.webp" },
+        { src: "/static/kany.webp" },
+        { src: "/static/wow.webp" },
+        { src: "/static/yo.webp" },
       ];
       let orbitingStickers = [];
 
@@ -2168,10 +2192,13 @@
       }
 
       let lastShakeTime = 0;
+      let musicFrameCount = 0;
       const pulseOverlay = document.getElementById("music-pulse-overlay");
 
       function musicReactiveLoop() {
         requestAnimationFrame(musicReactiveLoop);
+        musicFrameCount++;
+        if (isLowEnd && musicFrameCount % 3 !== 0) return;
         if (!analyserNode || !isPlayingMp3) {
           if (pulseOverlay) pulseOverlay.style.opacity = "0";
           return;
@@ -2248,7 +2275,7 @@
         termTick.innerText = Math.random() > 0.85 ? "SYS_ERR" : "SYS_OK";
         termTick.style.color =
           termTick.innerText === "SYS_ERR" ? "red" : "var(--neon-green)";
-      }, 1000);
+      }, isLowEnd ? 3000 : 1000);
 
       initThree();
       runThreeAnimation();
